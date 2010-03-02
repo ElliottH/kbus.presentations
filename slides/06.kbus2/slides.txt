@@ -27,6 +27,8 @@ What we want
 ------------
 Reliability.
 
+Simplicity.
+
 Previous experience
 -------------------
 * Communication between a browser and user processes.
@@ -38,9 +40,13 @@ Aims
 ----
 * Predictable delivery.
 
+* Deterministic message ordering (per KBUS device).
+
 * *Always* get a reply to a request.
 
 * Simple models to "think with".
+
+* Works in the embedded environment (small, works with just C).
 
 Predictable delivery
 --------------------
@@ -102,15 +108,22 @@ Simple models
 
 * Message names, ``to`` and ``from``, ``in_reply_to``, etc.
 
-Kernel module
--------------
+Kernel module (1)
+-----------------
 Using a kernel module means:
 
 * we can have a file interface
+* we can tell when a Listener "goes away" (including falling over)
 * we can have a real expectation of our "daemon" not crashing
 * we get to use relatively sophisticated and proven datastructures
+
+Kernel module (2)
+-----------------
+Using a kernel module means:
+
 * the kernel hides a lot of the complicated stuff (both at the top and bottom
   level) from us, so we can't do it wrong(!)
+* we get less context switching, and arguably better parallelism
 
 Names for things
 ----------------
@@ -130,6 +143,12 @@ content.
 
 The fields in the header aim to be easy to understand, and *just* the fields
 we need.
+
+Example uses
+------------
+* Video recording - start/stop/play from decoder to recorder
+* Industrial control systems - different processes communicating
+* Remote control and telemetry
 
 Are we Pythonic yet?
 --------------------
@@ -229,16 +248,13 @@ It needs to be:
 
 DBUS
 ----
-Initial thoughts:
-
 * I don't understand it (over complex model, no quick way in, way too much
   terminology - I may be biassed)
-* Socket oriented (not a kernel module)
+* Socket oriented (not a kernel module) so can't tell when clients fall over
+* No deterministic message ordering
 * I am told it is not all reliable...
 * ...or implemented
-* There is a lot of it
-
-But it is widely used (hmm) and has been around quite a while.
+* It's big
 
 The "kernel module" thing
 -------------------------
@@ -251,7 +267,6 @@ So that's OK then.
 
 zeromq / 0mq
 ------------
-Looks rather nice (I've not used it)
 
 * aiming for speed
 * and scalability
@@ -259,8 +274,12 @@ Looks rather nice (I've not used it)
 * *not* aiming for the sort of "predicability" we're after (I believe)
 * very cross platform
 
+zeromq / 0mq continue
+---------------------
 This looks like one it would be fun to play with, and I definitely need to
 learn more about it.
+
+It might be useful as a transport mechanism for KBUS messages over the net...
 
 What else?
 ----------

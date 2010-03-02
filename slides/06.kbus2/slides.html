@@ -3,14 +3,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
 <meta name="version" content="S5 1.1" />
 <title>Why KBUS?</title>
 <style type="text/css">
 
 /*
 :Author: David Goodger (goodger@python.org)
-:Id: $Id: html4css1.css 5951 2009-05-18 18:03:10Z milde $
+:Id: $Id: html4css1.css 5196 2007-06-03 20:25:28Z wiemann $
 :Copyright: This stylesheet has been placed in the public domain.
 
 Default cascading style sheet for the HTML output of Docutils.
@@ -158,32 +158,11 @@ h2.subtitle {
 hr.docutils {
   width: 75% }
 
-img.align-left, .figure.align-left{
-  clear: left ;
-  float: left ;
-  margin-right: 1em }
+img.align-left {
+  clear: left }
 
-img.align-right, .figure.align-right {
-  clear: right ;
-  float: right ;
-  margin-left: 1em }
-
-.align-left {
-  text-align: left }
-
-.align-center {
-  clear: both ;
-  text-align: center }
-
-.align-right {
-  text-align: right }
-
-/* reset inner alignment in figures */
-div.align-right {
-  text-align: left }
-
-/* div.align-center * { */
-/*   text-align: left } */
+img.align-right {
+  clear: right }
 
 ol.simple, ul.simple {
   margin-bottom: 1em }
@@ -238,7 +217,8 @@ p.topic-title {
 pre.address {
   margin-bottom: 0 ;
   margin-top: 0 ;
-  font: inherit }
+  font-family: serif ;
+  font-size: 100% }
 
 pre.literal-block, pre.doctest-block {
   margin-left: 2em ;
@@ -368,6 +348,7 @@ ul.auto-toc {
 <div class="slide" id="what-we-want">
 <h1>What we want</h1>
 <p>Reliability.</p>
+<p>Simplicity.</p>
 </div>
 <div class="slide" id="previous-experience">
 <h1>Previous experience</h1>
@@ -382,8 +363,10 @@ ul.auto-toc {
 <h1>Aims</h1>
 <ul class="simple">
 <li>Predictable delivery.</li>
+<li>Deterministic message ordering (per KBUS device).</li>
 <li><em>Always</em> get a reply to a request.</li>
 <li>Simple models to &quot;think with&quot;.</li>
+<li>Works in the embedded environment (small, works with just C).</li>
 </ul>
 </div>
 <div class="slide" id="predictable-delivery">
@@ -439,15 +422,23 @@ consequent Reply (or Status) message, and only one such.&quot;&quot;&quot;</bloc
 <li>Message names, <tt class="docutils literal"><span class="pre">to</span></tt> and <tt class="docutils literal"><span class="pre">from</span></tt>, <tt class="docutils literal"><span class="pre">in_reply_to</span></tt>, etc.</li>
 </ul>
 </div>
-<div class="slide" id="kernel-module">
-<h1>Kernel module</h1>
+<div class="slide" id="kernel-module-1">
+<h1>Kernel module (1)</h1>
 <p>Using a kernel module means:</p>
 <ul class="simple">
 <li>we can have a file interface</li>
+<li>we can tell when a Listener &quot;goes away&quot; (including falling over)</li>
 <li>we can have a real expectation of our &quot;daemon&quot; not crashing</li>
 <li>we get to use relatively sophisticated and proven datastructures</li>
+</ul>
+</div>
+<div class="slide" id="kernel-module-2">
+<h1>Kernel module (2)</h1>
+<p>Using a kernel module means:</p>
+<ul class="simple">
 <li>the kernel hides a lot of the complicated stuff (both at the top and bottom
 level) from us, so we can't do it wrong(!)</li>
+<li>we get less context switching, and arguably better parallelism</li>
 </ul>
 </div>
 <div class="slide" id="names-for-things">
@@ -465,6 +456,14 @@ content.</p>
 (hmm: future ASN.1 and XMPP support, maybe - &quot;not quite KBUS&quot;)</blockquote>
 <p>The fields in the header aim to be easy to understand, and <em>just</em> the fields
 we need.</p>
+</div>
+<div class="slide" id="example-uses">
+<h1>Example uses</h1>
+<ul class="simple">
+<li>Video recording - start/stop/play from decoder to recorder</li>
+<li>Industrial control systems - different processes communicating</li>
+<li>Remote control and telemetry</li>
+</ul>
 </div>
 <div class="slide" id="are-we-pythonic-yet">
 <h1>Are we Pythonic yet?</h1>
@@ -569,16 +568,15 @@ it must available in a C implementation)</li>
 </div>
 <div class="slide" id="dbus">
 <h1>DBUS</h1>
-<p>Initial thoughts:</p>
 <ul class="simple">
 <li>I don't understand it (over complex model, no quick way in, way too much
 terminology - I may be biassed)</li>
-<li>Socket oriented (not a kernel module)</li>
+<li>Socket oriented (not a kernel module) so can't tell when clients fall over</li>
+<li>No deterministic message ordering</li>
 <li>I am told it is not all reliable...</li>
 <li>...or implemented</li>
-<li>There is a lot of it</li>
+<li>It's big</li>
 </ul>
-<p>But it is widely used (hmm) and has been around quite a while.</p>
 </div>
 <div class="slide" id="the-kernel-module-thing">
 <h1>The &quot;kernel module&quot; thing</h1>
@@ -590,7 +588,6 @@ same APIs and expectations as the kernel module implementation.</p>
 </div>
 <div class="slide" id="zeromq-0mq">
 <h1>zeromq / 0mq</h1>
-<p>Looks rather nice (I've not used it)</p>
 <ul class="simple">
 <li>aiming for speed</li>
 <li>and scalability</li>
@@ -598,8 +595,12 @@ same APIs and expectations as the kernel module implementation.</p>
 <li><em>not</em> aiming for the sort of &quot;predicability&quot; we're after (I believe)</li>
 <li>very cross platform</li>
 </ul>
+</div>
+<div class="slide" id="zeromq-0mq-continue">
+<h1>zeromq / 0mq continue</h1>
 <p>This looks like one it would be fun to play with, and I definitely need to
 learn more about it.</p>
+<p>It might be useful as a transport mechanism for KBUS messages over the net...</p>
 </div>
 <div class="slide" id="what-else">
 <h1>What else?</h1>
