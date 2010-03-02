@@ -1,0 +1,272 @@
++++++++++
+Why KBUS?
++++++++++
+
+.. include:: <s5defs.txt>
+
+.. footer:: CamPUG 2nd March 2010
+
+.. class:: center
+
+    Tony Ibbs
+
+    tibs@tonyibbs.co.uk
+
+    Why not some other messaging system?
+
+What KBUS is
+------------
+A lightweight messaging system for Linux, particularly aimed at embedded platforms.
+
+Message passing is managed by a kernel module, via reading/writing
+``/dev/kbus0`` style devices.
+
+Python bindings are provided, as is a C library.
+
+What we want
+------------
+Reliability.
+
+Previous experience
+-------------------
+* Communication between a browser and user processes.
+* Race conditions when either crashes and restarts.
+* Unreliable implementation (frustrating when you're not allowed to fix it).
+* Poor documentation (well, some of that was fixable).
+
+Aims
+----
+* Predictable delivery.
+
+* *Always* get a reply to a request.
+
+* Simple models to "think with".
+
+Predictable delivery
+--------------------
+It is acceptable for a Listener to miss messages (but there are ways around
+that).
+
+But a Replier never shall.
+
+And each Request shall produce a Reply.
+
+Predictable delivery (1)
+------------------------
+If a sender attempts to send a Request, but does not have room on its message
+queue for the (corresponding) Reply, then the message will not be sent, and
+the send will fail.
+
+Predictable delivery (2)
+------------------------
+If a replier cannot receive a particular message, because its queue is full,
+then the message will not be sent, and the send will fail with an error.
+
+Predictable delivery (3)
+------------------------
+If a message has the ALL_OR_FAIL flag set, then a send will only succeed if
+the message could be added to all the (intended) recipient’s message queues
+(listeners as well).  Otherwise, send returns -EBUSY.
+
+*(Primarily for use in debugging systems, we think)*
+
+Predictable delivery (4)
+------------------------
+If a message has the ALL_OR_WAIT flag set, then a send will only succeed if
+the message could be added to all the (intended) recipient’s message queues
+(listeners as well).  Otherwise send returns -EAGAIN.
+
+(The sender then needs to discard the message, or play the poll/select game to
+wait for the send to finish).
+
+*(Primarily for use in debugging systems, we think)*
+
+Always get a reply
+------------------
+    """KBUS guarantees that each Request will (eventually) be matched by a
+    consequent Reply (or Status) message, and only one such."""
+
+If the replier can't give a Reply, KBUS will (e.g.,
+"``$.KBUS.Replier.Unbound``" or "``$.KBUS.ReplierGoneAway``").
+
+Simple models
+-------------
+* KBUS devices.
+
+* Ksocks implemented with file operations - ``open``, ``read``, ``write``,
+  ``close`` and IOCTLs.
+
+* Senders, Listeners, Repliers.
+
+* Announcements, Requests, Replies.
+
+* Message names, ``to`` and ``from``, ``in_reply_to``, etc.
+
+Kernel module
+-------------
+Using a kernel module means:
+
+* we can have a file interface
+* we can have a real expectation of our "daemon" not crashing
+* we get to use relatively sophisticated and proven datastructures
+* the kernel hides a lot of the complicated stuff (both at the top and bottom
+  level) from us, so we can't do it wrong(!)
+
+Names for things
+----------------
+I hope the names (Listener, Sender, Request, etc.) are simple and easy to
+understand.
+
+Ksock is a compromise (it's better than "Elephant").
+
+Sorry about Limpets.
+
+Messages
+--------
+KBUS defines the message structure, but does not say anything about its
+content.
+
+    (hmm: future ASN.1 and XMPP support, maybe - "not quite KBUS")
+
+The fields in the header aim to be easy to understand, and *just* the fields
+we need.
+
+Are we Pythonic yet?
+--------------------
+Well, it's an aim.
+
+::
+
+    >>> import this
+
+.. rejig the margin
+
+   *(the next few slides are not meant to be dwelt over!)*
+
+import this (1)
+---------------
+* Beautiful is better than ugly.
+
+I can't really judge that, as I'm too close!
+
+import this (2)
+---------------
+* Explicit is better than implicit.
+* Simple is better than complex.
+* Complex is better than complicated.
+
+Messaging is complex, we try not to make it complicated to do.
+
+We also try to implement only what we need, not "other stuff that might be
+useful".
+
+import this (3)
+---------------
+* Flat is better than nested.
+
+I think KBUS is a "flat" system.
+
+* Sparse is better than dense.
+
+OK... not sure how that applies.
+
+import this (4)
+---------------
+* Readability counts.
+
+Again, you'll have to judge - I hope we're making a system that helps provide
+readable code.
+
+import this (5)
+---------------
+* Special cases aren't special enough to break the rules.
+* Although practicality beats purity.
+
+That's a difficult balance to judge - we're trying.
+
+import this (6)
+---------------
+* Errors should never pass silently.
+* Unless explicitly silenced.
+
+These definitely *are* KBUS aims.
+
+import this (7)
+---------------
+* In the face of ambiguity, refuse the temptation to guess.
+* There should be one-- and preferably only one --obvious way to do it.
+* Although that way may not be obvious at first unless you're Dutch.
+* Now is better than never.
+* Although never is often better than *right* now.
+
+Hmm.
+
+import this (8)
+---------------
+* If the implementation is hard to explain, it's a bad idea.
+* If the implementation is easy to explain, it may be a good idea.
+
+*Of course* these apply - I hope we're getting the balance right.
+
+import this (9)
+---------------
+* Namespaces are one honking great idea -- let's do more of those!
+
+Erm...
+
+(KBUS appears to be noticeably lacking in the namespaces arena)
+
+Why not use?
+------------
+What else could we have used?
+
+It needs to be:
+
+* open source
+* well maintained
+* run on Linux in an embedded environment (so preferably not too large, and
+  it must available in a C implementation)
+
+DBUS
+----
+Initial thoughts:
+
+* I don't understand it (over complex model, no quick way in, way too much
+  terminology - I may be biassed)
+* Socket oriented (not a kernel module)
+* I am told it is not all reliable...
+* ...or implemented
+* There is a lot of it
+
+But it is widely used (hmm) and has been around quite a while.
+
+The "kernel module" thing
+-------------------------
+So, OK, I would like to have a user-space KBUS daemon available. Which would
+then gain some of the problems that things like DBUS share (crashing and
+restarting issues, for a start). But we'd be aiming to make it behave with the
+same APIs and expectations as the kernel module implementation.
+
+So that's OK then.
+
+zeromq / 0mq
+------------
+Looks rather nice (I've not used it)
+
+* aiming for speed
+* and scalability
+* messages are simpler than we want (not *really* a problem?)
+* *not* aiming for the sort of "predicability" we're after (I believe)
+* very cross platform
+
+This looks like one it would be fun to play with, and I definitely need to
+learn more about it.
+
+What else?
+----------
+Ideas would be welcome.
+
+(I'm ignoring many "enterprise space" systems, which often do seek guarantees
+of delivery, but at the cost of being an enterprise system.)
+
+.. vim: set filetype=rest tabstop=8 shiftwidth=2 expandtab:

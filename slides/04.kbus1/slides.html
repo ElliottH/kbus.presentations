@@ -1,0 +1,893 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
+<meta name="version" content="S5 1.1" />
+<title>A simple introduction to using KBUS</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 5951 2009-05-18 18:03:10Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left{
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: left }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<script src="ui/small-white/slides.js" type="text/javascript"></script>
+<link rel="stylesheet" href="ui/small-white/slides.css"
+      type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/small-white/outline.css"
+      type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/small-white/print.css"
+      type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/small-white/opera.css"
+      type="text/css" media="projection" id="operaFix" />
+
+<style type="text/css">
+#currentSlide {display: none;}
+</style>
+</head>
+<body>
+<div class="layout">
+<div id="controls"></div>
+<div id="currentSlide"></div>
+<div id="header">
+
+</div>
+<div id="footer">
+<h1>A simple introduction to using KBUS</h1>
+<h2>CamPUG 2nd March 2010</h2>
+</div>
+</div>
+<div class="presentation">
+<div class="slide" id="slide0">
+<h1 class="title">A simple introduction to using KBUS</h1>
+
+<!-- Definitions of interpreted text roles (classes) for S5/HTML data. -->
+<!-- This data file has been placed in the public domain. -->
+<!-- Colours
+======= -->
+<!-- Text Sizes
+========== -->
+<!-- Display in Slides (Presentation Mode) Only
+========================================== -->
+<!-- Display in Outline Mode Only
+============================ -->
+<!-- Display in Print Only
+===================== -->
+<!-- Display in Handout Mode Only
+============================ -->
+<!-- Incremental Display
+=================== -->
+<p class="center">Tony Ibbs</p>
+<p class="center"><a class="reference external" href="mailto:tibs&#64;tonyibbs.co.uk">tibs&#64;tonyibbs.co.uk</a></p>
+<p>This is intended as a very simple introduction to the basics of how to use
+KBUS. The examples are not realistic, but should give some flavour of the
+way that KBUS works.</p>
+
+</div>
+<div class="slide" id="what-kbus-is">
+<h1>What KBUS is</h1>
+<p>A lightweight messaging system for Linux, particularly aimed at embedded platforms.</p>
+<p>Message passing is managed by a kernel module, via reading/writing
+<tt class="docutils literal"><span class="pre">/dev/kbus0</span></tt> style devices.</p>
+<p>Python bindings are provided, as is a C library.</p>
+</div>
+<div class="slide" id="so-this-presentation-is">
+<h1>So this presentation is...</h1>
+<p>A simple tale of two actors and an audience.</p>
+</div>
+<div class="slide" id="starting-up">
+<h1>Starting up</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+$ python
+Python 2.6.4 (r264:75706, Dec  7 2009, 18:45:15)
+[GCC 4.4.1] on linux2
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; from kbus import Ksock, Message
+&gt;&gt;&gt; # or, perhaps: from kbus import *
+</pre>
+</div>
+<p class="handout">I'm generally against doing an import of <tt class="docutils literal"><span class="pre">*</span></tt>, but it's reasonably safe
+with the KBUS python module, and it makes the tutorial shorter.</p>
+</div>
+<div class="slide" id="connecting-to-kbus">
+<h1>Connecting to KBUS</h1>
+<p>First our actor needs to connect to KBUS itself, by opening a Ksock:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rosencrantz = Ksock(0)
+</pre>
+</div>
+<p class="handout">This specifies which KBUS device to connect to. If KBUS is installed, then
+device <tt class="docutils literal"><span class="pre">0</span></tt> will always exist, so it is a safe choice. The default is to open
+the device for read and write - this makes sense since we will want to write
+messages to it.</p>
+</div>
+<div class="slide" id="sending-a-message">
+<h1>Sending a message</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; ahem = Message('$.Actor.Speak', 'Ahem')
+&gt;&gt;&gt; rosencrantz.send_msg(ahem)
+MessageId(0, 1)
+</pre>
+</div>
+<p class="handout">The first line creates a new message named <tt class="docutils literal"><span class="pre">$.Actor.Speak</span></tt>, with the
+message data <tt class="docutils literal"><span class="pre">&quot;Ahem&quot;</span></tt>.</p>
+<blockquote class="handout">
+<em>(All message names are composed of ``$`` followed by a series of
+dot-separated parts.)</em></blockquote>
+<p class="handout">The second line sends it. For convenience, the <tt class="docutils literal"><span class="pre">send_msg</span></tt> method also
+returns the <em>message id</em> assigned to the message by KBUS - this can be used
+to identify a specific message.</p>
+<p class="handout">This will succeed, but doesn't do anything very useful, because no-one is
+listening. So, we shall need a second process, which we shall start in a
+new terminal.</p>
+</div>
+<div class="slide" id="someone-to-listen">
+<h1>Someone to listen</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+$ python
+Python 2.6.4 (r264:75706, Dec  7 2009, 18:45:15)
+[GCC 4.4.1] on linux2
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; from kbus import *
+&gt;&gt;&gt; audience = Ksock(0)
+&gt;&gt;&gt; audience.bind('$.Actor.Speak')
+</pre>
+</div>
+<p class="handout">Here, the audience has opened the same KBUS device (messages cannot be sent
+between different KBUS devices). We've still opened it for
+write, since they might, for instance, want to be able to send <tt class="docutils literal"><span class="pre">$.Applause</span></tt>
+messages later on. They've then 'bound to' the <tt class="docutils literal"><span class="pre">$.Actor.Speak</span></tt> message,
+which means they will receive any messages that are sent with that name.</p>
+<blockquote class="handout">
+(In fact, all messages with that name sent by anyone, not just by
+rosencrantz.)</blockquote>
+</div>
+<div class="slide" id="sending-a-message-with-a-listener">
+<h1>Sending a message, with a listener</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rosencrantz.send_msg(ahem)
+MessageId(0, 2)
+</pre>
+</div>
+<p class="handout">This returns the message id of the message that was sent, as set by KBUS.
+Note it for the next slide...</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; audience.read_next_msg()
+Message('$.Actor.Speak', data='Ahem',
+        from_=1L, id=MessageId(0,2))
+</pre>
+</div>
+</div>
+<div class="slide" id="printing-messages">
+<h1>Printing messages</h1>
+<p>A friendlier representation of the message is given if one prints it:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+ &gt;&gt;&gt; print _
+&lt;Announcement '$.Actor.Speak', id=[0:2],
+ from=1, data='Ahem'&gt;
+</pre>
+</div>
+<p class="handout">Note that this shows that the message received has the same <tt class="docutils literal"><span class="pre">MessageId</span></tt> as
+the message sent (which is good!).</p>
+<p class="handout">&quot;Plain&quot; messages are also termed &quot;announcements&quot;, since they are just being
+broadcast to whoever might be listening.</p>
+</div>
+<div class="slide" id="listening-for-nothing">
+<h1>Listening for nothing...</h1>
+<p class="handout">Of course, if the audience tries to listen again, they're not going to &quot;hear&quot;
+anything new:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; msg = audience.read_next_msg()
+&gt;&gt;&gt; print msg
+None
+</pre>
+</div>
+</div>
+<div class="slide" id="waiting-for-new-messages">
+<h1>Waiting for new messages</h1>
+<p class="handout">and so they really need to set up a loop to wait for messages, something like:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; import select
+&gt;&gt;&gt; while 1:
+...    (r,w,x) = select.select([audience], [], [])
+...    # At this point, r should contain audience
+...    msg = audience.read_next_msg()
+...    print 'We heard', msg.name, msg.data
+...
+</pre>
+</div>
+<p class="handout">(although perhaps with more error checking, and maybe even a timeout, in a
+real example).</p>
+</div>
+<div class="slide" id="rosencrantz-speaks-again">
+<h1>Rosencrantz speaks again</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rosencrantz.send_msg(Message('$.Actor.Speak',
+...                      'Hello there'))
+MessageId(0, 3)
+&gt;&gt;&gt; rosencrantz.send_msg(Message('$.Actor.Speak',
+...                      'Can you hear me?'))
+MessageId(0, 4)
+</pre>
+</div>
+</div>
+<div class="slide" id="and-the-audience-hears-him">
+<h1>And the audience hears him</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+We heard $.Actor.Speak Hello there
+We heard $.Actor.Speak Can you hear me?
+</pre>
+</div>
+</div>
+<div class="slide" id="another-participant">
+<h1>Another participant</h1>
+<p class="handout">So now we'll introduce another participant:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+$ python
+Python 2.6.4 (r264:75706, Dec  7 2009, 18:45:15)
+[GCC 4.4.1] on linux2
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; from kbus import *
+&gt;&gt;&gt; guildenstern = Ksock(0)
+&gt;&gt;&gt; guildenstern.bind('$.Actor.*')
+</pre>
+</div>
+<p class="handout">Here, guildenstern is binding to any message whose name starts with
+<tt class="docutils literal"><span class="pre">$.Actor.</span></tt>.</p>
+</div>
+<div class="slide" id="the-audience-also-wants-actor">
+<h1>The audience also wants <tt class="docutils literal"><span class="pre">$.Actor.*</span></tt></h1>
+<p class="handout">In retrospect this, of course, makes sense for the audience, too
+- let's fix that:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&lt;CTRL-C&gt;
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 3, in &lt;module&gt;
+KeyboardInterrupt
+&gt;&gt;&gt; audience.bind('$.Actor.*')
+&gt;&gt;&gt; while 1:
+...    msg = audience.wait_for_msg()
+...    print 'We heard', msg.name, msg.data
+...
+</pre>
+</div>
+<p class="handout">(as a convenience, the Ksock class provides the <tt class="docutils literal"><span class="pre">wait_for_msg()</span></tt> wrapper
+around <tt class="docutils literal"><span class="pre">select.select</span></tt>, which is shorter to type...).</p>
+</div>
+<div class="slide" id="and-so-does-rosencrantz">
+<h1>And so does Rosencrantz</h1>
+<p class="handout">And maybe rosencrantz will want to hear his colleague:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rosencrantz.bind('$.Actor.*')
+</pre>
+</div>
+</div>
+<div class="slide" id="guildenstern-speaks">
+<h1>Guildenstern speaks</h1>
+<p class="handout">So let guildenstern speak:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; guildenstern.send_msg(Message('$.Actor.Speak',
+                          'Pssst!'))
+MessageId(0, 5)
+&gt;&gt;&gt; print guildenstern.read_next_msg()
+&lt;Announcement '$.Actor.Speak', id=[0:5],
+ from=3, data='Pssst!'&gt;
+</pre>
+</div>
+<p class="handout">Remember guildenstern is also listening to '$.Actor.*'</p>
+</div>
+<div class="slide" id="and-rosencrantz-hears">
+<h1>And Rosencrantz hears</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; print rosencrantz.read_next_msg()
+&lt;Announcement '$.Actor.Speak', id=[0:5], from=3,
+ data='Pssst!'&gt;
+</pre>
+</div>
+</div>
+<div class="slide" id="what-does-the-audience-hear">
+<h1>What does the audience hear?</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+We heard $.Actor.Speak Pssst!
+We heard $.Actor.Speak Pssst!
+</pre>
+</div>
+<p class="handout">This is because the audience has bound to the message twice - it is hearing it
+once because it asked to receive every <tt class="docutils literal"><span class="pre">$.Actor.Speak</span></tt> message, and again
+because it asked to hear any message matching <tt class="docutils literal"><span class="pre">$.Actor.*</span></tt>.</p>
+</div>
+<div class="slide" id="so-don-t-listen-twice">
+<h1>So don't listen twice...</h1>
+<p class="handout">The solution is simple - ask not to hear the more specific version:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&lt;CTRL-C&gt;
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 3, in &lt;module&gt;
+KeyboardInterrupt
+&gt;&gt;&gt; audience.unbind('$.Actor.Speak')
+&gt;&gt;&gt; while 1:
+...    msg = audience.wait_for_msg()
+...    print msg.from_, 'said', \
+...           msg.name[8:], msg.data
+...
+</pre>
+</div>
+<p class="handout">Note that we've also amended the printout to say who the message was from.</p>
+</div>
+<div class="slide" id="ksock-ids">
+<h1>Ksock ids</h1>
+<p>Each Ksock connection has an id associated with it - for instance:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rosencrantz.ksock_id()
+1L
+</pre>
+</div>
+</div>
+<div class="slide" id="message-from">
+<h1>Message <tt class="docutils literal"><span class="pre">from</span></tt></h1>
+<p>and every message indicates who sent it, so:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; print 'I heard', message.from_, 'say', \
+...       message.name, message.data
+I heard 3 say $.Actor.Speak Pssst!
+</pre>
+</div>
+</div>
+<div class="slide" id="done-with-shouting">
+<h1>Done with shouting</h1>
+<p>We've shown that KBUS allows one to &quot;announce&quot; (or, less politely,
+&quot;shout&quot;) messages, but KBUS also supports asking questions.</p>
+</div>
+<div class="slide" id="binding-as-a-replier">
+<h1>Binding as a Replier</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; guildenstern.bind('$.Actor.Guildenstern.query',
+...                   True)
+</pre>
+</div>
+<p class="handout"><em>(Only one person may be bound as Replier for a particular message
+name at any one time, so that it is unambiguous who is expected to do
+the replying.</em></p>
+<p class="handout"><em>Also, if a Sender tries to send a Request, but no-one has bound to that
+message name as a Replier, then an error is raised (contrast that with
+ordinary messages, where if no-one is listening, the message just gets
+ignored).)</em></p>
+</div>
+<div class="slide" id="rosencrantz-requests">
+<h1>Rosencrantz Requests</h1>
+<p class="handout">If Rosencrantz then sends a Request of that name:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; req = Request('$.Actor.Guildenstern.query',
+...               'Were you speaking to me?')
+&gt;&gt;&gt; rosencrantz.send_msg(req)
+MessageId(0, 6)
+</pre>
+</div>
+</div>
+<div class="slide" id="guildenstern-hears">
+<h1>Guildenstern hears</h1>
+<p class="handout">Guildenstern can receive it:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; msg2 = guildenstern.read_next_msg()
+&gt;&gt;&gt; print msg2
+&lt;Request '$.Actor.Guildenstern.query',
+ id=[0:6], from=1, flags=0x3 (REQ,YOU),
+ data='Were you speaking to me?'&gt;
+</pre>
+</div>
+</div>
+<div class="slide" id="and-again">
+<h1>And again</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; msg3 = guildenstern.read_next_msg()
+&gt;&gt;&gt; print msg3
+&lt;Request '$.Actor.Guildenstern.query', id=[0:6],
+ from=1, flags=0x1 (REQ),
+ data='Were you speaking to me?'&gt;
+</pre>
+</div>
+<p class="handout">As we should expect, guildenstern is getting the message twice, once because
+he has bound as a listener to '$.Actor.*', and once because he is bound as a
+Replier to this specific message.</p>
+<blockquote class="handout">
+<em>(There is, in fact, a way to ask KBUS to only deliver one copy of
+a given message, and if guildenstern had used that, he would only have
+received the Request that was marked for him to answer. I'm still a little
+undecided how often this mechanism should be used, though.)</em></blockquote>
+</div>
+<div class="slide" id="it-wants-you-to-reply-to-it">
+<h1>It wants <em>you</em> to reply to it</h1>
+<p>Looking at the two messages, the first is the Request specifically to
+guildenstern, which he is meant to answer:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; print msg2.wants_us_to_reply()
+True
+</pre>
+</div>
+<p>(and that is what the <tt class="docutils literal"><span class="pre">YOU</span></tt> in the flags means).</p>
+</div>
+<div class="slide" id="rosencrantz-hears-himself">
+<h1>Rosencrantz hears himself</h1>
+<p class="handout">And rosencrantz himself will also have received a copy:</p>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; print rosencrantz.read_next_msg()
+&lt;Request '$.Actor.Guildenstern.query', id=[0:6],
+ from=1, flags=0x1 (REQ),
+ data='Were you speaking to me?'&gt;
+</pre>
+</div>
+</div>
+<div class="slide" id="guildenstern-replies">
+<h1>Guildenstern replies</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; reply = reply_to(msg2, 'Yes, I was')
+&gt;&gt;&gt; print reply
+&lt;Reply '$.Actor.Guildenstern.query',
+ to=1, in_reply_to=[0:6],
+ data='Yes, I was'&gt;
+&gt;&gt;&gt; guildenstern.send_msg(reply)
+MessageId(0, 7)
+</pre>
+</div>
+<p class="handout">The <tt class="docutils literal"><span class="pre">reply_to</span></tt> convenience function crafts a new <tt class="docutils literal"><span class="pre">Reply</span></tt> message, with the
+various message parts set in an appropriate manner.</p>
+</div>
+<div class="slide" id="rosencrantz-hears-the-reply">
+<h1>Rosencrantz hears the reply</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rep = rosencrantz.read_next_msg()
+&gt;&gt;&gt; print rep.from_, 'said, \
+...       rep.name, rep.data
+3 said $.Actor.Guildenstern.query Yes, I was
+</pre>
+</div>
+<p class="handout">Note that Rosencrantz didn't need to bind to this message to receive it - he
+will always get a Reply to any Request he sends (KBUS goes to some lengths to
+guarantee this, so that even if Guildenstern closes his Ksock, it will
+generate a &quot;gone away&quot; message for him).</p>
+</div>
+<div class="slide" id="and-the-audience-hears-all">
+<h1>And the audience hears all</h1>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+1 said Guildenstern.query Were you speaking to me?
+3 said Guildenstern.query Yes, I was
+</pre>
+</div>
+</div>
+<div class="slide" id="summary-1">
+<h1>Summary (1)</h1>
+<ul class="simple">
+<li>To send or receive messages, a process opens a Ksock.</li>
+<li>A process can send messages (be a Sender).</li>
+</ul>
+</div>
+<div class="slide" id="summary-2">
+<h1>Summary (2)</h1>
+<ul class="simple">
+<li>A process can bind to receive messages (be a Listener) by message name.</li>
+<li>When binding to a message name, wildcards can be used.</li>
+<li>There can be any number of Listeners for a given message name.</li>
+</ul>
+</div>
+<div class="slide" id="summary-3">
+<h1>Summary (3)</h1>
+<ul class="simple">
+<li>When binding to a message name, a process can say it wants to receive
+Requests with that name (be a Replier)</li>
+<li>There can only be one Replier for a given message name.</li>
+</ul>
+</div>
+<div class="slide" id="summary-4">
+<h1>Summary (4)</h1>
+<ul class="simple">
+<li>It is not an error to send an ordinary message if no-one is listening.</li>
+<li>It is an error to send a Request if there is no Replier.</li>
+</ul>
+</div>
+<div class="slide" id="more">
+<h1>More...</h1>
+<ul class="simple">
+<li>Stateful transactions</li>
+<li>Urgent messages</li>
+<li>Limpets</li>
+</ul>
+</div>
+<div class="slide" id="where-to-find-it">
+<h1>Where to find it</h1>
+<p>On Google code (so google for it)</p>
+<blockquote>
+<a class="reference external" href="http://kbus.googlecode.com/">http://kbus.googlecode.com/</a></blockquote>
+<p>Open source, MIT licensed (kernel module GPL v2, documentation Creative
+Commons).</p>
+</div>
+<div class="slide" id="stateful-transactions">
+<h1>Stateful transactions</h1>
+<ol class="arabic simple">
+<li>send a Request</li>
+<li>receive the Reply</li>
+<li>note the Ksock id of the replier</li>
+<li>send another Request to that specific replier</li>
+</ol>
+<p>Step 4 will fail if <em>that specific Ksock</em> is no longer bound as the Replier
+for the message name.</p>
+<p class="handout">This allows a sender to guarantee that it is communicating with a particular
+instance of the replier for a message name.</p>
+<div class="handout note">
+<p class="first admonition-title">Note</p>
+<p>Running the examples in this introduction requires having
+the KBUS kernel module installed. If this is not already done, and you have
+the KBUS sources, then <tt class="docutils literal"><span class="pre">cd</span></tt> to the kernel module directory (i.e.,
+<tt class="docutils literal"><span class="pre">kbus</span></tt> in the sources) and do:</p>
+<pre class="literal-block">
+make
+make rules
+sudo insmod kbus.ko
+</pre>
+<p>When you've finished the examples, you can remove the kernel module again
+with:</p>
+<pre class="literal-block">
+sudo rmmod kbus.ko
+</pre>
+<p class="last">The message ids shown in the examples are correct if you've just installed
+the kernel module - the second number in each message id will be different
+(although always ascending) otherwise.</p>
+</div>
+<!-- vim: set filetype=rest tabstop=8 shiftwidth=2 expandtab: -->
+</div>
+</div>
+</body>
+</html>
