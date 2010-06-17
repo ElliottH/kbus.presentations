@@ -1,0 +1,715 @@
+============================
+KBUS talk for EuroPython2010
+============================
+
+---
+How
+---
+
+.. [[[
+    from rst_terminal import Terminal
+
+    print "Introducing Rosencrantz"
+    r = Terminal(1, "Rosencrantz")
+    r.do("from kbus import Ksock",
+         "rosencrantz = Ksock(0)",
+         "print rosencrantz")
+.. ]]]
+
+Rosencrantz can send a message.
+
+.. [[[
+    r.do("from kbus import Message",
+         "ahem = Message('$.Actor.Speak', 'Ahem')",
+         "rosencrantz.send_msg(ahem)")
+.. ]]]
+
+But no-one is listening.
+
+    (explain about message ids, though)
+
+Introduce the audience, who bind to the message Rosencrantz was using.
+
+.. [[[
+    a = Terminal(2, "Audience")
+    a.do("from kbus import *",
+         "audience = Ksock(0)",
+         "audience.bind('$.Actor.Speak')")
+.. ]]]
+
+If Rosencrantz sends the message again, the audience can receive it.
+
+    (note the new message id)
+
+.. [[[
+    r.do("rosencrantz.send_msg(ahem)")
+    a.do("audience.read_next_msg()")
+.. ]]]
+
+Or, more prettily
+
+    (note how the message id matches that given to Rosencrantz)
+
+.. [[[
+    a.do("print _")
+.. ]]]
+
+We can set the audience to listening using 'select'
+
+.. [[[
+    a.do("import select",
+          "while 1:",
+          "   (r,w,x) = select.select([audience], [], [])",
+          "   # At this point, r should contain audience",
+          "   print audience.read_next_msg()",
+          "")
+.. ]]]
+
+So now if Rosencrantz talks...
+
+.. [[[
+    r.do("rosencrantz.send_msg(Message('$.Actor.Speak', 'Hello there'))",
+         "rosencrantz.send_msg(Message('$.Actor.Speak', 'Can you hear me?'))")
+.. ]]]
+
+...the audience should be able to hear him:
+
+.. [[[
+    a.show()
+.. ]]]
+
+Introducing Guildenstern.
+
+.. [[[
+    g = Terminal(3, "Guildenstern")
+    g.do("from kbus import *",
+         "guildenstern = Ksock(0)",
+         "print guildenstern")
+.. ]]]
+
+Who also starts listening - this time using a wildcard
+
+.. [[[
+    g.do("guildenstern.bind('$.Actor.*')")
+.. ]]]
+
+In retrospect this makes sense for the audience, too - let's fix that
+(and use the KBUS provided way of doing our 'select' loop as well)
+
+.. [[[
+    a.do("<CONTROL_C>",
+        "audience.bind('$.Actor.*')",
+         "while 1:",
+         "   print audience.wait_for_msg()",
+         "")
+.. ]]]
+
+There's nothing for Guildenstern to hear yet, of course.
+
+.. [[[
+    g.do("print guildenstern.read_next_msg()")
+.. ]]]
+
+Maybe rosencrantz will want to hear his colleague:
+
+.. [[[
+    r.do("rosencrantz.bind('$.Actor.*')")
+.. ]]]
+
+So let guildenstern speak:
+
+.. [[[
+    g.do("guildenstern.send_msg(Message('$.Actor.Speak', 'Pssst!'))",
+         "# Remember guildenstern is himself listening to '$.Actor.*'",
+         "print guildenstern.read_next_msg()")
+.. ]]]
+
+and rosencrantz hears:
+
+.. [[[
+    r.do("msg = rosencrantz.read_next_msg()",
+         "print msg")
+.. ]]]
+
+However, when we look to the audience, we see:
+
+.. [[[
+    a.show()
+.. ]]]
+
+This is because the audience has bound to the message twice - it is hearing it
+once because it asked to receive every ``$.Actor.Speak`` message, and again
+because it asked to hear any message matching ``$.Actor.*``.
+
+The solution is simple - ask not to hear the more specific version
+(an unbinding must match the binding exactly).
+
+.. [[[
+    a.do("<CONTROL-C>",
+         "audience.unbind('$.Actor.Speak')",
+         "while 1:",
+         "   msg = audience.wait_for_msg()",
+         "   print msg",
+         "")
+.. ]]]
+
+Note that messages also say who they are from.
+
+Each Ksock connection has an id associated with it - for instance:
+
+.. [[[
+    r.do("rosencrantz.ksock_id()")
+.. ]]]
+
+and every message indicates who sent it, so:
+
+.. [[[
+    r.do("print msg")
+.. ]]]
+
+We've shown that KBUS allows one to "announce" (or, less politely,
+"shout") messages, but KBUS also supports asking questions.
+
+So let's make Guildenstern listen to "Speak" messages, and act as a
+Replier for "query" messages...
+
+.. [[[
+    g.do("guildenstern.unbind('$.Actor.*')",
+         "guildenstern.bind('$.Actor.Speak')",
+         "guildenstern.bind('$.Actor.Ask.Guildenstern', True)")
+.. ]]]
+
+   *(Only one person may be bound as Replier for a particular message
+   name at any one time, so that it is unambiguous who is expected to do
+   the replying.*
+
+   *Also, if a Sender tries to send a Request, but no-one has bound to that
+   message name as a Replier, then an error is raised (contrast that with
+   ordinary messages, where if no-one is listening, the message just gets
+   ignored).)*
+
+If Rosencrantz then sends a Request of that name:
+
+.. [[[
+    r.do("from kbus import Request",
+         "req = Request('$.Actor.Ask.Guildenstern', 'Were you speaking to me?')",
+         "rosencrantz.send_msg(req)")
+.. ]]]
+
+Remember, Rosencrantz still hears himself speaking - so
+let's undo that...
+
+.. [[[
+    r.do("print rosencrantz.read_next_msg()",
+         "rosencrantz.unbind('$.Actor.*')")
+.. ]]]
+
+Guildenstern can receive it:
+
+.. [[[
+    g.do("msg2 = guildenstern.read_next_msg()",
+         "print msg2",
+         "msg3 = guildenstern.read_next_msg()",
+         "print msg3")
+.. ]]]
+
+As we should expect, guildenstern is getting the message twice, once because
+he has bound as a listener to '$.Actor.*', and once because he is bound as a
+Replier to this specific message.
+
+*(There is, in fact, a way to ask KBUS to only deliver one copy of
+a given message, and if guildenstern had used that, he would only have
+received the Request that was marked for him to answer. I'm still a little
+undecided how often this mechanism should be used, though.)*
+
+Looking at the two messages, the first is the Request specifically to
+guildenstern, which he is meant to answer:
+
+.. [[[
+    g.do("print msg2.wants_us_to_reply()")
+.. ]]]
+
+(and that is what the ``YOU`` in the flags means).
+
+Guildenstern can then reply:
+
+.. [[[
+    g.do("reply = reply_to(msg2, 'Yes, yes I was')",
+         "print reply",
+         "guildenstern.send_msg(reply)",
+         "guildenstern.read_next_msg()")
+.. ]]]
+
+The ``reply_to`` convenience function crafts a new ``Reply`` message, with the
+various message parts set in an appropriate manner. And thus:
+
+.. [[[
+    r.do("rep = rosencrantz.read_next_msg()",
+         "print rep")
+.. ]]]
+
+Note that Rosencrantz didn't need to be bound to this message to receive it -
+he will always get a Reply to any Request he sends (KBUS goes to some lengths
+to guarantee this, so that even if Guildenstern closes his Ksock, it will
+generate a "gone away" message for him).
+
+Of course, the audience was listening.
+
+.. [[[
+    a.show()
+.. ]]]
+
+-------------------------------------------------------------------------------
+
+Stateful transactions - explanations to be added later.
+
+.. [[[
+    r.do("# About to start tossing coins",
+         "req = rosencrantz.send_msg(Request('$.Actor.Ask.Guildenstern',",
+         "'Will you count heads for me?'))")
+.. ]]]
+
+.. [[[
+    g.do("req = guildenstern.read_next_msg()",
+         "guildenstern.send_msg(reply_to(req, 'Yes, yes I shall'))",
+         "guildenstern.bind('$.Actor.CoinToss', True)",
+         "heads = 0")
+.. ]]]
+
+.. [[[
+    r.do("rep = rosencrantz.read_next_msg()",
+         "print rep.from_",
+         "# Throws a head",
+         "from kbus import stateful_request",
+         "sreq = stateful_request(rep, '$.Actor.CoinToss', 'Head')",
+         "rosencrantz.send_msg(sreq)")
+.. ]]]
+
+.. [[[
+    g.do("while True:",
+         "    toss = guildenstern.wait_for_msg()",
+         "    if toss.data == 'Head':",
+         "       print 'A head - amazing'",
+         "       heads += 1",
+         "    else:",
+         "       print 'Bah, tails'",
+         "    guildenstern.send_msg(reply_to(toss, 'Head count is %d'%heads))",
+         "")
+.. ]]]
+
+.. [[[
+    r.do("count = rosencrantz.read_next_msg()",
+         "print 'So,',count.data",
+         "# Throws a head",
+         "sreq = stateful_request(rep, '$.Actor.CoinToss', 'Head')",
+         "rosencrantz.send_msg(sreq)")
+.. ]]]
+
+The same again:
+
+.. [[[
+    g.show()
+.. ]]]
+
+Rosencrantz is good at throwing heads:
+
+.. [[[
+    r.do("count = rosencrantz.read_next_msg()",
+         "print 'So,',count.data",
+         "# Throws a head")
+.. ]]]
+
+But, aha, Falstaff intervenes, and forces Guildenstern to disconnect:
+
+.. [[[
+    g.do("<CONTROL-C>",
+         "print 'Ouch'",
+         "guildenstern.close()")
+.. ]]]
+
+And attempts to hijack the conversation - although, of course, he has no idea
+of how many heads have been tossed, so would not actually be of any use:
+
+.. [[[
+    f = Terminal(4, "Falstaff")
+    f.do("from kbus import *",
+         "falstaff = Ksock(0)",
+         "falstaff.bind('$.Actor.CoinToss', True)")
+.. ]]]
+
+Innocently, Rosencrantz continues:
+
+.. [[[
+    r.do("sreq = stateful_request(rep, '$.Actor.CoinToss', 'Head')",
+         "rosencrantz.send_msg(sreq)")
+.. ]]]
+
+And discovers that, in fact, state has been lost, skulduggery has been done,
+and so forth.
+
+::
+
+  $ errno.py 32
+  Error 32 (0x20) is EPIPE: Broken pipe
+
+  KBUS:
+  On attempting to send 'to' a specific replier, the replier with that id
+  is no longer bound to the given message's name.
+
+From the audience's point of view:
+
+.. [[[
+    a.show()
+.. ]]]
+
+-------------------------------------------------------------------------------
+
+And to end things...
+
+.. [[[
+    a.do("<CONTROL_C>",
+         "exit()")
+.. ]]]
+
+Tidy everyone else up as well (showing that no-one has any messages left):
+
+.. [[[
+    r.do("for msg in rosencrantz:",
+         "    print msg",
+         "",
+         "exit()")
+    print
+    g.do("exit()")
+    print
+    f.do("for msg in falstaff:",
+         "    print msg",
+         "",
+         "exit()")
+.. ]]]
+
+-------------------------------------------------------------------------------
+
+---
+Why
+---
+
+.. Taken from the Kynesim blog post
+
+So why are we developing KBUS, rather than using some other messaging system?
+
+  (I'm going to assume you've seen the previous blog items on KBUS, and/or
+  read the KBUS documentation on its Google code page.)
+
+.. more
+
+Our background
+--------------
+We work primarily in the embedded world, specifically on Set-Top Boxes (STBs).
+As such, typical software elements include video and audio decoders (or the
+interfaces to them, if this is done by hardware), user interface via remote
+control or keyboard, and some form of GUI, typically a web browser.
+
+Clearly, some mechanism is required to provide communication between all of
+these elements.
+
+We have had experience of bad solutions in the past - their flaws include such
+things as race conditions (for instance, when a browser crashes, it cannot
+reliably resume communication with the other processes it needs to liaise
+with), unreliable implementations (frustrating when one is not allowed to fix
+them) and poor documentation (well, some of that was fixable).
+
+Aims
+----
+We thus set out with the following aims for our solution:
+
+* Simple models to "think with", so that we can have a well understood system.
+* Predictable delivery.
+* *Always* get a reply to a request.
+* Messages (on a particular bus) are in the same order for all recipients.
+* Small implementation size.
+* Base code available in C (C++, for instance, is not always available on the
+  platforms we work with).
+* Good usability from Python (well, that was my requirement)
+* We'd really prefer an open source package, and we definitely want one that
+  is actively maintained.
+
+and that didn't really seem to leave us with an option other than writing it
+ourselves.
+
+Simple models
+-------------
+Names for things
+~~~~~~~~~~~~~~~~
+We've striven for simple names for things:
+
+* KBUS devices are the buses over which communication happens.
+
+* Ksocks are the connections to those buses. The name is meant to suggest they
+  are a bit like sockets, but not quite.
+
+      (I'm not actually terribly happy with "Ksock", but it's difficult to
+      come up with good names for things, and it's better than the working
+      name of "Elephant" that I was using for a short while in early
+      development.)
+
+* The basic messaging entities are Senders, Listeners and Repliers - one
+  should already be able to guess what they do.
+
+* The basic types of messages are Announcements, Requests, Replies - again,
+  these should be fairly obvious.
+
+* Message names are defined fairly simply, with (we hope) just enough
+  flexibility, and the parts of a message (``to`` and ``from``,
+  ``in_reply_to``, etc.) are hopefully not too hard to understand from their
+  names.
+
+* I'm sorry about Limpets.
+
+Interfaces
+~~~~~~~~~~
+There are three levels of interface provided:
+
+1. The "bare Unix" level.
+
+   We use a kernel module to provide our devices, which are named as
+   ``/dev/kbus0`` (for bus 0), ``/dev/kbus1`` (for bus 1), and so on.
+ 
+   Ksocks are then implemented with file operations - ``open``, ``read``,
+   ``write``, ``close`` and IOCTLs), with which experienced Unix programmers
+   should already be familiar,
+
+2. The Python API. This was written as the primary testing API, and works with
+   classes that match the main named things. I believe this to be fairly easy
+   to use. I also use it as the main way of illustrating how KBUS works.
+
+3. The C library. This hides the details of the "bare Unix" level, and also
+   removes the worry about handling such things as ``ernno`` when using
+   IOTCLs. It is intended to be the normal means of using KBUS from C, and
+   should also be useful when writing interfaces in other languages (which can
+   typically call C).
+
+The KBUS kernel module
+~~~~~~~~~~~~~~~~~~~~~~
+Using a kernel module means that:
+
+* We can have a file interface, which makes KBUS easier to use.
+* We can have a real expectation of our "daemon" not crashing (it is much
+  easier to write a kernel module that is reliable, partly because there are
+  so many constraints on how one does it, partly because one is executing in a
+  different context, and partly because kernel mechanisms mediate the modules
+  interaction with user space).
+* We get to use relatively sophisticated and proven datastructures. Kernel
+  modules are expected to use the provided mechanisms for handling lists
+  and other datatypes. This avoids a lot of reinventing the wheel, or
+  dependency on other libraries which might not be present.
+* The kernel hides a lot of the complicated stuff (both at the top and bottom
+  level) from us, so we can't do it wrong (well, it's much harder). For
+  instance, ``read`` and ``write`` at the user level get filtered down into
+  more predictable calls at the kernel module level.
+* We stand to gain from the kernel handling such issues as multiple CPUs,
+  threading and so on.
+
+Messages
+~~~~~~~~
+In order to keep KBUS itself simple, KBUS does not say anything about the
+message content. It restricts itself to defining the message header and the
+mechanisms for managing messages.
+
+    (We do have a nearly finished ASN.1 library for message data, and are
+    looking at XMPP support, but these will be extras, not core KBUS. And,
+    of course, one can use other mechanisms as one wishes.)
+
+As indicated in the section on naming, the fields in the header aim to be easy
+to understand, and we try to define *just* the fields we need.
+
+Predictable delivery
+--------------------
+It is acceptable for a Listener to miss messages (although there are ways around
+that), but a Replier shall never miss the Requests sent to it.
+
+We also want to guarantee that each Request shall produce a Reply (even if it
+is a Reply indicating failure to deliver the Request).
+
+So:
+
+* If a sender attempts to send a Request, but does not have room on its
+  message queue for the (corresponding) Reply, then the message will not be
+  sent, and the send will fail. At the "bare Unix" level, this means that the
+  ``send`` IOCTL returns an error - the failure is immediate.
+
+* If a replier cannot receive a particular message, because its queue is full,
+  then the message will not be sent, and the send will fail with an error.
+  Again, this failure is immediate.
+
+* If a message has the ALL_OR_FAIL flag set, then a send will only succeed if
+  the message could be added to all the (intended) recipient’s message
+  queues (listeners as well).  Otherwise, ``send`` returns -EBUSY.
+
+* If a message has the ALL_OR_WAIT flag set, then a send will only succeed if
+  the message could be added to all the (intended) recipient’s message
+  queues (listeners as well).  Otherwise ``send`` returns -EAGAIN.
+
+  (The sender then needs to discard the message, or play the
+  ``poll``/``select`` game to wait for the send to finish).
+
+Note that we believe these last two mechanisms are primarily of use when
+debugging systems.
+
+Finally:
+
+    """KBUS guarantees that each Request will (eventually) be matched by a
+    consequent Reply (or Status) message, and only one such."""
+
+If the replier can't give a Reply, KBUS will generate one (e.g.,
+"``$.KBUS.Replier.Unbound``" or "``$.KBUS.ReplierGoneAway``").
+
+Message order is the same for all
+---------------------------------
+It is important that if sender A sends message M(a), and sender B sends
+message M(b), then all recipients of both messages will see them in the same
+order.
+
+    (Imagine sending instructions to a video decoder and a video recorder.
+    Clearly both may need to receive the same instructions, and it is
+    important to receive the instructions in the appropriate order.
+
+    Similarly, consider a logging Listener. This too clearly wants to receive
+    messages in the same order as the other Listeners. It especially wants to
+    see Requests and Replies in the appropriate order.)
+
+Since KBUS (the kernel module) has control over both ends of the transactions,
+this is fairly simple to guarantee.
+
+.. Are we Pythonic yet?
+   --------------------
+   Well, it's an aim. For quick amusement, we can look at the Zen of Python and
+   try to see how we're doing:
+   
+   ::
+   
+     >>> import this
+     Beautiful is better than ugly.
+   
+   I can't really judge that, as I'm too close!
+   
+   ::
+   
+     Explicit is better than implicit.
+     Simple is better than complex.
+     Complex is better than complicated.
+   
+   Messaging is complex, we try not to make it complicated to do.
+   
+   We also try to implement only what we need, not "other stuff that might be
+   useful".
+   
+   ::
+   
+     Flat is better than nested.
+   
+   I think KBUS is a "flat" system.
+   
+   ::
+   
+     Sparse is better than dense.
+   
+   OK... not sure how that applies.
+   
+   ::
+   
+     Readability counts.
+   
+   Again, you'll have to judge - I hope we're making a system that helps provide
+   readable code.
+   
+   ::
+   
+     Special cases aren't special enough to break the rules.
+     Although practicality beats purity.
+   
+   That's a difficult balance to judge - we're trying.
+   
+   ::
+   
+     Errors should never pass silently.
+     Unless explicitly silenced.
+   
+   These definitely *are* KBUS aims.
+   
+   ::
+   
+     In the face of ambiguity, refuse the temptation to guess.
+     There should be one-- and preferably only one --obvious way to do it.
+     Although that way may not be obvious at first unless you're Dutch.
+     Now is better than never.
+     Although never is often better than *right* now.
+   
+   Hmm.
+   
+   ::
+   
+     If the implementation is hard to explain, it's a bad idea.
+     If the implementation is easy to explain, it may be a good idea.
+   
+   These apply - I hope we're getting the balance right.
+   
+   ::
+   
+     Namespaces are one honking great idea -- let's do more of those!
+   
+   Erm...  KBUS appears to be noticeably lacking in the namespaces arena.
+
+Why not use?
+------------
+What else could we have used?
+
+There appear to be two main things we could have considered, DBUS and zeromq.
+
+DBUS
+~~~~
+I've not spent an awful lot of time looking at DBUS, but my initial thoughts
+are that:
+
+* I don't understand it. Its documentation seems to show an over complex
+  model, with no quick way in to understanding it, and a wish to split things
+  into as many levels as possible.
+* It is socket oriented (not a kernel module), which is probably the best
+  approach for a user-space daemon, but
+* it is in user-space, with the problems that can entail.
+* I am told it is not all reliable...
+* ...or even all implemented
+* Perhaps most importantly, it doesn't preserve message ordering.
+* It is large.
+
+But it is widely used (hmm) and has been around quite a while.
+
+zeromq / 0mq
+~~~~~~~~~~~~
+zeromq (or 0mq) looks rather nice. It has good introductions, and seems to
+have a clear idea of what its aims are, in particular aiming for speed
+and scalability.
+
+Its messages are minimalistic in strucure (a name and then content), which is
+really rather nice. It is also very cross platform, both in the "implemented
+on" sense, and in the "available for language X" sense.
+
+It doesn't appear to b e aiming for the sort of "predicability" we're after
+(or so I deduce from a scan of the documentation). And it is written in C++,
+which rules it out for some prospective platforms.
+
+However, this looks like one it would be fun to play with, and I definitely need to
+learn more about it.
+
+  (It's very tempting to think about it as a potential means of moving KBUS
+  messages over networks, for instance.)
+
+What else?
+~~~~~~~~~~
+I must have missed systems that I really should know about.
+
+(Although note I'm ignoring many "enterprise space" systems, which often do
+seek guarantees of delivery, but at the cost of being an enterprise system.)
+
+
+
+.. vim: set filetype=rst tabstop=8 softtabstop=2 shiftwidth=2 expandtab:
