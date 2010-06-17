@@ -2,6 +2,15 @@
 KBUS talk for EuroPython2010
 ============================
 
+Tony Ibbs, tibs@tonyibbs.co.uk
+
+------------------------------------------------------------------------------
+
+1. How to use KBUS
+2. Why we wanted it
+
+Maybe some other bits...
+
 ---
 How
 ---
@@ -389,6 +398,38 @@ Tidy everyone else up as well (showing that no-one has any messages left):
 
 -------------------------------------------------------------------------------
 
+So, in summary:
+
+* To send or receive messages, a process opens a Ksock.
+* A process can send messages (be a Sender).
+* A process can bind to receive messages (be a Listener) by message name.
+* When binding to a message name, wildcards can be used.
+* When binding to a message name, a process can say it wants to receive
+  Requests with that name (be a Replier)
+* It is not an error to send an ordinary message if no-one is listening.
+* It is an error to send a Request if there is no Replier.
+* There can only be one Replier for a given message name.
+* There can be any number of Listeners for a given message name.
+* Stateful Reqests insist that the expected Replier is replying.
+
+.. note:: Running the examples in this introduction requires having
+   the KBUS kernel module installed. If this is not already done, and you have
+   the KBUS sources, then ``cd`` to the kernel module directory (i.e.,
+   ``kbus`` in the sources) and do::
+
+             make
+             make rules
+             sudo insmod kbus.ko
+
+   When you've finished the examples, you can remove the kernel module again
+   with::
+
+             sudo rmmod kbus.ko
+
+   The message ids shown in the examples are correct if you've just installed
+   the kernel module - the second number in each message id will be different
+   (although always ascending) otherwise.
+
 ---
 Why
 ---
@@ -404,7 +445,7 @@ So why are we developing KBUS, rather than using some other messaging system?
 
 Our background
 --------------
-We work primarily in the embedded world, specifically on Set-Top Boxes (STBs).
+We work primarily in the embedded world, particularly on Set-Top Boxes (STBs).
 As such, typical software elements include video and audio decoders (or the
 interfaces to them, if this is done by hardware), user interface via remote
 control or keyboard, and some form of GUI, typically a web browser.
@@ -424,8 +465,10 @@ We thus set out with the following aims for our solution:
 
 * Simple models to "think with", so that we can have a well understood system.
 * Predictable delivery.
+* Reliability.
 * *Always* get a reply to a request.
-* Messages (on a particular bus) are in the same order for all recipients.
+* Messages (on a particular bus) are in the same order for all recipients
+  (deterministic message ordering per device).
 * Small implementation size.
 * Base code available in C (C++, for instance, is not always available on the
   platforms we work with).
@@ -502,12 +545,18 @@ Using a kernel module means that:
   modules are expected to use the provided mechanisms for handling lists
   and other datatypes. This avoids a lot of reinventing the wheel, or
   dependency on other libraries which might not be present.
+* We benefit from kernel strategies on memory management, copying, etc.
 * The kernel hides a lot of the complicated stuff (both at the top and bottom
   level) from us, so we can't do it wrong (well, it's much harder). For
   instance, ``read`` and ``write`` at the user level get filtered down into
   more predictable calls at the kernel module level.
 * We stand to gain from the kernel handling such issues as multiple CPUs,
   threading and so on.
+* With KBUS being in the kernel address space, we should benefit from less
+  context switching.
+* We can realistically expect to be told when a Ksock has closed, including if
+  it has been closed because the process that opened it has crashed. This type
+  of guarantee is much harder to attain in user space.
 
 Messages
 ~~~~~~~~
@@ -565,9 +614,9 @@ If the replier can't give a Reply, KBUS will generate one (e.g.,
 
 Message order is the same for all
 ---------------------------------
-It is important that if sender A sends message M(a), and sender B sends
-message M(b), then all recipients of both messages will see them in the same
-order.
+It is important that if sender R sends message M(r) on KBUS device S, and
+sender G sends message M(g) on the same KBUS, then all recipients of both
+messages will see them in the same order.
 
     (Imagine sending instructions to a video decoder and a video recorder.
     Clearly both may need to receive the same instructions, and it is
@@ -579,6 +628,35 @@ order.
 
 Since KBUS (the kernel module) has control over both ends of the transactions,
 this is fairly simple to guarantee.
+
+Isolation of buses
+------------------
+KBUS can provide multiple KBUS devices, but it does not allow communication
+between them; they are totally isolated from each other.
+
+Think of our notional R and G as metaphorical goldfish in a bowl.
+They can only communicate via KBUS, and each bowl contains a single KBUS
+device - in this instance, KBUS device 3:
+
+.. image:: images/04_fish_in_bowl2.png
+   :width:  370px
+   :height: 306px
+   :scale:  66
+
+Two other fish, communicating via a different KBUS device, are in a different
+metaphorical bowl, and thus cannot communicate with R and G.
+
+.. image:: images/04_fish_in_bowl2.png
+   :width:  370px
+   :height: 306px
+   :scale:  66
+
+.. image:: images/05_fish_talk.png
+   :width:  370px
+   :height: 306px
+   :scale:  66
+
+*(but, limpets...)*
 
 .. Are we Pythonic yet?
    --------------------
@@ -675,10 +753,17 @@ are that:
   into as many levels as possible.
 * It is socket oriented (not a kernel module), which is probably the best
   approach for a user-space daemon, but
-* it is in user-space, with the problems that can entail.
+* It is in user-space, with the problems that can entail (including the
+  difficulty of detecting if a replier has closed/crashed)
+* Perhaps most importantly, it doesn't preserve message ordering across the
+  bus. This is one of our key requirements.
+
+    (My other note says "can't have more than one connection to the same dbus,
+    and thus cannot get message ordering" - this sounds a key problem, if
+    true.)
+
 * I am told it is not all reliable...
 * ...or even all implemented
-* Perhaps most importantly, it doesn't preserve message ordering.
 * It is large.
 
 But it is widely used (hmm) and has been around quite a while.
@@ -709,6 +794,38 @@ I must have missed systems that I really should know about.
 
 (Although note I'm ignoring many "enterprise space" systems, which often do
 seek guarantees of delivery, but at the cost of being an enterprise system.)
+
+.. note:: There is also the simple Linux/POSIX message system, check its name,
+   but that doesn't address various of the issues. Explain...
+
+----------------
+Example messages
+----------------
+Some actual example message names, from Real Applications (lightly obfuscated,
+perhaps).
+
+...EXAMPLES TO BE INSERTED...
+
+Maybe mention:
+
+1. C++ bindings - I don't have the experience in C++ to write well designed
+   bindings. Either use the C API, or talk directly on the file interface.
+   If someone wants to contribute one...
+
+2. JavaScript - we do have bindings for V8 (for a customer), but obviously
+   each JavaScript implementation needs to have its own implementation. Talk
+   to us if this is of interest...
+
+3. Other languages - either the C API or the direct approach should serve as a
+   starting point. Perhaps OO bindings can look at what I've done for Python.
+
+-------
+Limpets
+-------
+
+.. note:: I don't believe there will be room to get such into the slide
+   show(!), but perhaps something should go into the paper? At least a mention
+   that there is something to look at?
 
 
 
