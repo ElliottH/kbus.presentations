@@ -79,6 +79,10 @@ new terminal.
          "audience.bind('$.Actor.Speak')")
 .. ]]]
 
+I don't recommend using ``from`` thing ``import *``, but it does make
+use at the prompt easier, and thus KBUS is designed to be safe for this
+purpose.
+
 Here, the audience has opened the same KBUS device (messages cannot be sent
 between different KBUS devices). We've still opened it for
 write, since they might, for instance, want to be able to send ``$.Applause``
@@ -104,7 +108,7 @@ A friendlier representation of the message is given if one prints it:
     a.do("print _")
 .. ]]]
 
-"Plain" messages are also termed "announcements", since they are just being
+"Plain" messages are termed "announcements", since they are just being
 broadcast to whoever might be listening.
 
 The message received has the same ``MessageId`` as the message sent (which is
@@ -126,8 +130,7 @@ Of course, if the audience tries to listen again, they're not going to "hear"
 anything new:
 
 .. [[[
-    a.do("msg = audience.read_next_msg()",
-         "print msg")
+    a.do("print audience.read_next_msg()")
 .. ]]]
 
 We can set the audience to listening for messages as they arrive using
@@ -158,7 +161,7 @@ So now if Rosencrantz speaks...
     a.show()
 .. ]]]
 
-Let's introduce another participant:
+Let's introduce another participant, also on the same KBUS device:
 
 .. [[[
     g = Terminal(3, "Guildenstern")
@@ -167,15 +170,16 @@ Let's introduce another participant:
          "print guildenstern")
 .. ]]]
 
-Who also starts listening - this time using a wildcard. This listener will
+who also starts listening - this time using a wildcard. This listener will
 hear any message whose name starts with ``$.Actor.``.
 
 .. [[[
     g.do("guildenstern.bind('$.Actor.*')")
 .. ]]]
 
-In retrospect this makes sense for the audience, too - let's fix that
-(and use the KBUS provided way of doing our 'select' loop as well)
+In retrospect this makes sense for the audience, too - let's fix that.
+For convenience, the KBUS Python binding provides a useful method to handle
+our ``select``:
 
 .. [[[
     a.do("<CONTROL_C>",
@@ -185,7 +189,7 @@ In retrospect this makes sense for the audience, too - let's fix that
          "")
 .. ]]]
 
-Maybe rosencrantz will want to hear his colleague:
+It seems likely that rosencrantz will want to hear his colleague as well:
 
 .. [[[
     r.do("rosencrantz.bind('$.Actor.*')")
@@ -217,6 +221,7 @@ once because it asked to receive every ``$.Actor.Speak`` message, and again
 because it asked to hear any message matching ``$.Actor.*``.
 
 The solution is simple - ask not to hear the more specific version.
+
 Note that an unbinding must match the binding exactly.
 
 .. [[[
@@ -227,8 +232,6 @@ Note that an unbinding must match the binding exactly.
          "   print msg",
          "")
 .. ]]]
-
-Note that messages also say who they are from.
 
 We've shown that KBUS allows one to "announce" (or, less politely,
 "shout") messages, but KBUS also supports asking questions.
@@ -259,47 +262,55 @@ If Rosencrantz then sends a Request of that name:
          "rosencrantz.send_msg(req)")
 .. ]]]
 
-Remember, Rosencrantz still hears himself speaking - so
-let's undo that...
+Remember, Rosencrantz still hears himself speaking - so let's undo that...
 
 .. [[[
     r.do("print rosencrantz.read_next_msg()",
          "rosencrantz.unbind('$.Actor.*')")
 .. ]]]
 
-Guildenstern can receive it:
+Guildenstern receives the request:
 
 .. [[[
-    g.do("msg2 = guildenstern.read_next_msg()",
-         "print msg2",
-         "msg3 = guildenstern.read_next_msg()",
-         "print msg3")
+    g.do("req = guildenstern.read_next_msg()",
+         "print req")
 .. ]]]
 
-As we should expect, guildenstern is getting the message twice, once because
-he has bound as a listener to '$.Actor.*', and once because he is bound as a
-Replier to this specific message.
+The flags indicate that this message is a Request (``REQ``), and also that
+this is a Request that guildenstern should reply to (``YOU``).
+
+There's a convenience method to find out if a particular message needs a
+reply:
+
+.. [[[
+    g.do("print req.wants_us_to_reply()")
+.. ]]]
+
+Of course, guildenstern also gets a copy of the message because of his binding
+as a Listener to ``$.Actor.*``:
+
+.. [[[
+    g.do("msg = guildenstern.read_next_msg()",
+         "print msg")
+.. ]]]
+
+This second copy of the message is still marked as a Request (``REQ``), but is
+not marked as needing a reply (no ``YOU`` flag).
+
+Incidentally, KBUS does guarantee that the Request marked for reply will
+always be the first copy of the message to be received.
 
 *(There is, in fact, a way to ask KBUS to only deliver one copy of
 a given message, and if guildenstern had used that, he would only have
 received the Request that was marked for him to answer. I'm still a little
 undecided how often this mechanism should be used, though.)*
 
-Looking at the two messages, the first is the Request specifically to
-guildenstern, which he is meant to answer:
-
-.. [[[
-    g.do("print msg2.wants_us_to_reply()")
-.. ]]]
-
-(and that is what the ``YOU`` in the flags means).
-
 Guildenstern can then reply:
 
 .. [[[
-    g.do("reply = reply_to(msg2, 'Yes, yes I was')",
-         "print reply",
-         "guildenstern.send_msg(reply)",
+    g.do("rep = reply_to(req, 'Yes, yes I was')",
+         "print rep",
+         "guildenstern.send_msg(rep)",
          "guildenstern.read_next_msg()")
 .. ]]]
 

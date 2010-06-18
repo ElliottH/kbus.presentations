@@ -4,9 +4,18 @@
 It attempts to output the result in a form that can be cut-and-pasted
 straight into the reStructuredText document.
 
-Note that just about everything about this script is exceedingly hacky...
-
 Use -debug to see the indentation explicitly.
+
+Note that just about everything about this script is exceedingly hacky,
+especially the "wait a bit in the hope that the child process will have
+settled down" approach, which *mostly* works, except when it doesn't.
+
+(Or in other words, running this for a particular Terminal will generally
+give the "right" results, but sometimes won't, and so the output should
+always be inspected before it is used. You have been warned.)
+
+Also, things I don't want to do have not been tested, and probably don't
+work.
 """
 
 import os

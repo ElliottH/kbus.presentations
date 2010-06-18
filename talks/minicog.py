@@ -36,11 +36,26 @@ def canonical_path(path):
     path = os.path.abspath(path)          # copes with ., thing/../fred, etc.
     return path
 
-def next_line(infd):
-    line = infd.readline()
-    if line:
-        return line
-    else:
+class Reader(object):
+
+    def __init__(self, infd):
+        self.infd = infd
+        self.line = None
+        self.line_num = 0
+
+    def next_line(self):
+        self.line_num += 1
+        self.line = self.infd.readline()
+        if self.line:
+            return self.line
+        else:
+            raise StopIteration     # end-of-file
+
+    def indent_error(self, expected_indent):
+        print 'Stopping - line %d appears wrongly indented'%self.line_num
+        print 'Expecting indentation of %d, got %d'%(expected_indent,
+                calc_indent(self.line))
+        print '"%s"'%self.line.rstrip()
         raise StopIteration
 
 def calc_indent(line):
@@ -49,23 +64,17 @@ def calc_indent(line):
         indent_len += 1
     return indent_len
 
-def indent_error(expected_indent, line):
-    print 'Stopping - line appears wrongly indented'
-    print 'Expecting indentation of %d, got %d'%(expected_indent,calc_indent(line))
-    print '"%s"'%line.rstrip()
-    raise StopIteration
-
-def get_next_generator(infd, globals, verbose=True):
+def get_next_generator(reader, globals, verbose=True):
     blocknum = 0
     while True:
-        line = next_line(infd)
+        line = reader.next_line()
         if line.startswith('.. [[['):
             if verbose:
                 blocknum += 1
                 print 'Code block %d'%blocknum
             indent_len = indent_str = None
             codelines = []
-            line = next_line(infd)
+            line = reader.next_line()
             while not line.startswith('.. ]]]'):
                 if not line.strip():
                     # Empty line - just accept it as is
@@ -74,18 +83,22 @@ def get_next_generator(infd, globals, verbose=True):
                 elif line.startswith('   '):    # minimum for an rst comment
                     if indent_str:
                         if not line.startswith(indent_str):
-                            indent_error(indent_len, line)
+                            reader.indent_error(indent_len)
                     else:
                         indent_len = calc_indent(line)
                         indent_str = indent_len * ' '
                     codelines.append(line[indent_len:].rstrip())
                 else:
-                    indent_error(3, line)
-                line = next_line(infd)
+                    reader.indent_error(3)
+                line = reader.next_line()
             codelines.append('')
             try:
                 sys.stdout = outputter
                 exec '\n'.join(codelines) in globals
+            except:
+                sys.stdout = sys.__stdout__
+                print 'Stopping - error in code block ending at line',reader.line_num
+                raise
             finally:
                 sys.stdout = sys.__stdout__
             result = outputter.getvalue()
@@ -94,8 +107,9 @@ def get_next_generator(infd, globals, verbose=True):
         else:
             yield line
 
-def process(infd, outfd):
-    get_next = get_next_generator(infd, {})
+def process(infd, outfd, verbose=True):
+    reader = Reader(infd)
+    get_next = get_next_generator(reader, {}, verbose)
     for text in get_next:
         outfd.write(text)
 
@@ -124,7 +138,7 @@ def main(args):
 
     with open(infile) as infd:
         if outfile == '-':
-            process(infd, sys.stdout)
+            process(infd, sys.stdout, verbose=False)
         else:
             with open(outfile,'w') as outfd:
                 process(infd, outfd)
