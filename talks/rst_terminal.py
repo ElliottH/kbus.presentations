@@ -17,7 +17,7 @@ import sys
 import subprocess
 import time
 
-DEFAULT_WAIT = 0.1
+DEFAULT_WAIT = 0.2
 DEFAULT_INTRO = """\
   .. compound::
 

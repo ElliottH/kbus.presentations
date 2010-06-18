@@ -55,10 +55,14 @@ def indent_error(expected_indent, line):
     print '"%s"'%line.rstrip()
     raise StopIteration
 
-def get_next_generator(infd, globals):
+def get_next_generator(infd, globals, verbose=True):
+    blocknum = 0
     while True:
         line = next_line(infd)
         if line.startswith('.. [[['):
+            if verbose:
+                blocknum += 1
+                print 'Code block %d'%blocknum
             indent_len = indent_str = None
             codelines = []
             line = next_line(infd)
