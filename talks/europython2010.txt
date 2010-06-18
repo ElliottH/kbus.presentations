@@ -4,6 +4,8 @@ KBUS talk for EuroPython2010
 
 Tony Ibbs, tibs@tonyibbs.co.uk
 
+http://code.google.com/p/kbus/
+
 ------------------------------------------------------------------------------
 
 1. How to use KBUS
@@ -11,9 +13,17 @@ Tony Ibbs, tibs@tonyibbs.co.uk
 
 Maybe some other bits...
 
----
-How
----
+-----------------------------------------
+How - A simple introduction to using KBUS
+-----------------------------------------
+
+This is intended as a very simple introduction to the basics of how to use
+KBUS. The examples are not realistic, but should give some flavour of the
+way that KBUS works.
+
+We shall start with a single "actor" in our virtual playlet:
+
+First our actor needs to connect to KBUS itself, by opening a Ksock:
 
 .. [[[
     from rst_terminal import Terminal
@@ -25,7 +35,12 @@ How
          "print rosencrantz")
 .. ]]]
 
-Rosencrantz can send a message.
+This specifies which KBUS device to connect to. If KBUS is installed, then
+device ``0`` will always exist, so it is a safe choice. The default is to open
+the device for read and write - this makes sense since we will want to write
+messages to it.
+
+Once we've done that, we can try sending a message:
 
 .. [[[
     r.do("from kbus import Message",
@@ -33,11 +48,29 @@ Rosencrantz can send a message.
          "rosencrantz.send_msg(ahem)")
 .. ]]]
 
-But no-one is listening.
+The first line creates a new message named ``$.Actor.Speak``, with the
+message data ``"Ahem"``.
 
-    (explain about message ids, though)
+    *(All message names are composed of ``$`` followed by a series of
+    dot-separated parts.)*
 
-Introduce the audience, who bind to the message Rosencrantz was using.
+The second line sends it. For convenience, the ``send_msg`` method also
+returns the *message id* assigned to the message by KBUS - this can be used
+to identify a specific message.
+
+    *(When a message is created by a user, it does not have a message
+    id. When it is sent, the KBUS kernel module assigns it a message id,
+    which uniquely identifies the message on this KBUS device. Message
+    ids are unique, and the second number in the id is incremented for
+    each message.)*
+
+    *(Note this is not quite the whole story, as if there already was a
+    message id it won't be changed, but that's for other purposes.)*
+
+This will succeed, but doesn't do anything very useful, because no-one is
+listening. So, we shall need a second process, which we shall start in a
+new terminal.
+
 
 .. [[[
     a = Terminal(2, "Audience")
@@ -46,24 +79,59 @@ Introduce the audience, who bind to the message Rosencrantz was using.
          "audience.bind('$.Actor.Speak')")
 .. ]]]
 
-If Rosencrantz sends the message again, the audience can receive it.
+Here, the audience has opened the same KBUS device (messages cannot be sent
+between different KBUS devices). We've still opened it for
+write, since they might, for instance, want to be able to send ``$.Applause``
+messages later on. They've then 'bound to' the ``$.Actor.Speak`` message,
+which means they will receive any messages that are sent with that name.
 
-    (note the new message id)
+    (In fact, all messages with that name sent by anyone, not just by
+    rosencrantz.)
+
+Now, if Rosencrantz sends the message again, the audience can receive it.
 
 .. [[[
     r.do("rosencrantz.send_msg(ahem)")
     a.do("audience.read_next_msg()")
 .. ]]]
 
-Or, more prettily
+Note the new message has a new message id, and the message read by the
+audience has the same message id - i.e., is the same message.
 
-    (note how the message id matches that given to Rosencrantz)
+A friendlier representation of the message is given if one prints it:
 
 .. [[[
     a.do("print _")
 .. ]]]
 
-We can set the audience to listening using 'select'
+"Plain" messages are also termed "announcements", since they are just being
+broadcast to whoever might be listening.
+
+The message received has the same ``MessageId`` as the message sent (which is
+good!).
+
+Each Ksock connection has an id associated with it - for instance:
+
+.. [[[
+    r.do("rosencrantz.ksock_id()")
+.. ]]]
+
+And the message also indicates who sent it (the ``from`` field).
+
+.. [[[
+    a.do("print _")
+.. ]]]
+
+Of course, if the audience tries to listen again, they're not going to "hear"
+anything new:
+
+.. [[[
+    a.do("msg = audience.read_next_msg()",
+         "print msg")
+.. ]]]
+
+We can set the audience to listening for messages as they arrive using
+'select'
 
 .. [[[
     a.do("import select",
@@ -74,7 +142,10 @@ We can set the audience to listening using 'select'
           "")
 .. ]]]
 
-So now if Rosencrantz talks...
+  (although perhaps with more error checking, and maybe even a timeout, in a
+  real example).
+
+So now if Rosencrantz speaks...
 
 .. [[[
     r.do("rosencrantz.send_msg(Message('$.Actor.Speak', 'Hello there'))",
@@ -87,7 +158,7 @@ So now if Rosencrantz talks...
     a.show()
 .. ]]]
 
-Introducing Guildenstern.
+Let's introduce another participant:
 
 .. [[[
     g = Terminal(3, "Guildenstern")
@@ -96,7 +167,8 @@ Introducing Guildenstern.
          "print guildenstern")
 .. ]]]
 
-Who also starts listening - this time using a wildcard
+Who also starts listening - this time using a wildcard. This listener will
+hear any message whose name starts with ``$.Actor.``.
 
 .. [[[
     g.do("guildenstern.bind('$.Actor.*')")
@@ -111,12 +183,6 @@ In retrospect this makes sense for the audience, too - let's fix that
          "while 1:",
          "   print audience.wait_for_msg()",
          "")
-.. ]]]
-
-There's nothing for Guildenstern to hear yet, of course.
-
-.. [[[
-    g.do("print guildenstern.read_next_msg()")
 .. ]]]
 
 Maybe rosencrantz will want to hear his colleague:
@@ -150,8 +216,8 @@ This is because the audience has bound to the message twice - it is hearing it
 once because it asked to receive every ``$.Actor.Speak`` message, and again
 because it asked to hear any message matching ``$.Actor.*``.
 
-The solution is simple - ask not to hear the more specific version
-(an unbinding must match the binding exactly).
+The solution is simple - ask not to hear the more specific version.
+Note that an unbinding must match the binding exactly.
 
 .. [[[
     a.do("<CONTROL-C>",
@@ -163,18 +229,6 @@ The solution is simple - ask not to hear the more specific version
 .. ]]]
 
 Note that messages also say who they are from.
-
-Each Ksock connection has an id associated with it - for instance:
-
-.. [[[
-    r.do("rosencrantz.ksock_id()")
-.. ]]]
-
-and every message indicates who sent it, so:
-
-.. [[[
-    r.do("print msg")
-.. ]]]
 
 We've shown that KBUS allows one to "announce" (or, less politely,
 "shout") messages, but KBUS also supports asking questions.
