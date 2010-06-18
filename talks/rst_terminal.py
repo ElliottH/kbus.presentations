@@ -46,7 +46,7 @@ class Terminal(object):
     A terminal has a name (the actor name) and an index (the terminal number).
     """
 
-    def __init__(self, index, name, *args, **kwargs):
+    def __init__(self, index, name):
         # Certainly on Linux (Ubuntu) things don't seem to work
         # properly if we use "shell=True".
         self.interp = subprocess.Popen(['python', '-u', '-i', '-'],
