@@ -704,22 +704,17 @@ They can only communicate via KBUS, and each bowl contains a single KBUS
 device - in this instance, KBUS device 3:
 
 .. image:: images/04_fish_in_bowl2.png
-   :width:  370px
-   :height: 306px
-   :scale:  66
+   :width: 5cm
+
+.. :width:  370px
+.. :height: 306px
+.. :scale:  66
 
 Two other fish, communicating via a different KBUS device, are in a different
 metaphorical bowl, and thus cannot communicate with R and G.
 
-.. image:: images/04_fish_in_bowl2.png
-   :width:  370px
-   :height: 306px
-   :scale:  66
-
-.. image:: images/05_fish_talk.png
-   :width:  370px
-   :height: 306px
-   :scale:  66
+.. image:: images/09_two_disjoint_bowls.png
+   :width: 10.3cm
 
 *(but, limpets...)*
 
