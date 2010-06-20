@@ -5,5 +5,4 @@ echo Reading _europython.tmp, preparing _europython.html
 rst2html _europython2010.tmp > _europython2010.html
 echo Reading _europython2010.tmp, preparing _europython2010.pdf
 rst2pdf _europython2010.tmp -o _europython2010.pdf \
-                --fit-literal-mode=overflow \
-                -v
+                --fit-literal-mode=overflow

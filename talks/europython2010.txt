@@ -2,21 +2,22 @@
 KBUS talk for EuroPython2010
 ============================
 
-Tony Ibbs, tibs@tonyibbs.co.uk
+:Author: Tony Ibbs
+:Contact: tibs@tonyibbs.co.uk
+:Date: July 2010
 
-http://code.google.com/p/kbus/
+:Repository: http://code.google.com/p/kbus/
 
 ------------------------------------------------------------------------------
 
-1. How to use KBUS
-2. Why we wanted it
-
-Maybe some other bits...
+.. contents::
 
 -----------------------------------------
 How - A simple introduction to using KBUS
 -----------------------------------------
 
+Senders and Listeners
+---------------------
 This is intended as a very simple introduction to the basics of how to use
 KBUS. The examples are not realistic, but should give some flavour of the
 way that KBUS works.
@@ -35,12 +36,13 @@ First our actor needs to connect to KBUS itself, by opening a Ksock:
          "print rosencrantz")
 .. ]]]
 
-This specifies which KBUS device to connect to. If KBUS is installed, then
-device ``0`` will always exist, so it is a safe choice. The default is to open
-the device for read and write - this makes sense since we will want to write
-messages to it.
+The argument to Ksock is the number of the KBUS device to connect to. If KBUS
+is installed, then device ``0`` will always exist, so it is a safe choice.
 
-Once we've done that, we can try sending a message:
+The default is to open the device for read and write - this makes sense since
+we will want to write messages to it.
+
+Once we've done that, we can try creating and sending a message:
 
 .. [[[
     r.do("from kbus import Message",
@@ -48,24 +50,29 @@ Once we've done that, we can try sending a message:
          "rosencrantz.send_msg(ahem)")
 .. ]]]
 
-The first line creates a new message named ``$.Actor.Speak``, with the
+The call to Message creates a new message named ``$.Actor.Speak``, with the
 message data ``"Ahem"``.
 
-    *(All message names are composed of ``$`` followed by a series of
-    dot-separated parts.)*
+    *All message names are composed of a ``$`` followed by a series of
+    dot-separated parts.*
 
-The second line sends it. For convenience, the ``send_msg`` method also
+    *Data doesn't have to be a string, it can be any sequence of bytes, but a
+    simple string makes sense for these examples.*
+
+The next line sends it. For convenience, the ``send_msg`` method also
 returns the *message id* assigned to the message by KBUS - this can be used
 to identify a specific message.
 
-    *(When a message is created by a user, it does not have a message
-    id. When it is sent, the KBUS kernel module assigns it a message id,
-    which uniquely identifies the message on this KBUS device. Message
-    ids are unique, and the second number in the id is incremented for
-    each message.)*
+    *When a message is created by a user, it does not have a message id.*
+   
+    *When the KBUS kernel module makes its internal copy of the message, it
+    assigns it a new message id, which uniquely identifies the message on this
+    KBUS device. Basically, the second number in the id is incremented for
+    each message.*
 
-    *(Note this is not quite the whole story, as if there already was a
-    message id it won't be changed, but that's for other purposes.)*
+    *(Note this is not quite the whole story, as KBUS behaves differently if
+    given a message that already has an id set, but that's for use with
+    Limpets, which we'll ignore for now.)*
 
 This will succeed, but doesn't do anything very useful, because no-one is
 listening. So, we shall need a second process, which we shall start in a
@@ -111,30 +118,22 @@ A friendlier representation of the message is given if one prints it:
 "Plain" messages are termed "announcements", since they are just being
 broadcast to whoever might be listening.
 
-The message received has the same ``MessageId`` as the message sent (which is
-good!).
-
-Each Ksock connection has an id associated with it - for instance:
+The message also indicates who it is from (in the ``from_`` field). This gives
+the Ksock id of the Sender, which we can determine with:
 
 .. [[[
     r.do("rosencrantz.ksock_id()")
 .. ]]]
 
-And the message also indicates who sent it (the ``from`` field).
-
-.. [[[
-    a.do("print _")
-.. ]]]
-
-Of course, if the audience tries to listen again, they're not going to "hear"
-anything new:
+Since there was only one message sent, if the audience tries to listen again,
+they're not going to "hear" anything new:
 
 .. [[[
     a.do("print audience.read_next_msg()")
 .. ]]]
 
 We can set the audience to listening for messages as they arrive using
-'select'
+'select' in the traditional manner:
 
 .. [[[
     a.do("import select",
@@ -145,8 +144,8 @@ We can set the audience to listening for messages as they arrive using
           "")
 .. ]]]
 
-  (although perhaps with more error checking, and maybe even a timeout, in a
-  real example).
+(although perhaps with more error checking, and maybe even a timeout, in a
+real example).
 
 So now if Rosencrantz speaks...
 
@@ -170,16 +169,16 @@ Let's introduce another participant, also on the same KBUS device:
          "print guildenstern")
 .. ]]]
 
-who also starts listening - this time using a wildcard. This listener will
-hear any message whose name starts with ``$.Actor.``.
+We can start them listening as well - this time using a wildcard.
 
 .. [[[
     g.do("guildenstern.bind('$.Actor.*')")
 .. ]]]
 
+Guildenstern will hear any message whose name starts with the characters
+``$.Actor.``.
+
 In retrospect this makes sense for the audience, too - let's fix that.
-For convenience, the KBUS Python binding provides a useful method to handle
-our ``select``:
 
 .. [[[
     a.do("<CONTROL_C>",
@@ -189,13 +188,16 @@ our ``select``:
          "")
 .. ]]]
 
+For convenience, the KBUS Python binding provides the ``wait_for_msg`` method
+to handle the simple form of ``select``.
+
 It seems likely that rosencrantz will want to hear his colleague as well:
 
 .. [[[
     r.do("rosencrantz.bind('$.Actor.*')")
 .. ]]]
 
-So let guildenstern speak:
+So now let guildenstern speak:
 
 .. [[[
     g.do("guildenstern.send_msg(Message('$.Actor.Speak', 'Pssst!'))",
@@ -222,8 +224,6 @@ because it asked to hear any message matching ``$.Actor.*``.
 
 The solution is simple - ask not to hear the more specific version.
 
-Note that an unbinding must match the binding exactly.
-
 .. [[[
     a.do("<CONTROL-C>",
          "audience.unbind('$.Actor.Speak')",
@@ -233,16 +233,17 @@ Note that an unbinding must match the binding exactly.
          "")
 .. ]]]
 
+Note that the unbinding must match the binding exactly.
+
+Requests and Repliers
+---------------------
 We've shown that KBUS allows one to "announce" (or, less politely,
 "shout") messages, but KBUS also supports asking questions.
 
-So let's make Guildenstern listen to "Speak" messages, and act as a
-Replier for "query" messages...
+So let's make Guildenstern act as a Replier for "query" messages...
 
 .. [[[
-    g.do("guildenstern.unbind('$.Actor.*')",
-         "guildenstern.bind('$.Actor.Speak')",
-         "guildenstern.bind('$.Actor.Ask.Guildenstern', True)")
+    g.do("guildenstern.bind('$.Actor.Ask.Guildenstern', True)")
 .. ]]]
 
    *(Only one person may be bound as Replier for a particular message
@@ -300,12 +301,17 @@ not marked as needing a reply (no ``YOU`` flag).
 Incidentally, KBUS does guarantee that the Request marked for reply will
 always be the first copy of the message to be received.
 
-*(There is, in fact, a way to ask KBUS to only deliver one copy of
-a given message, and if guildenstern had used that, he would only have
-received the Request that was marked for him to answer. I'm still a little
-undecided how often this mechanism should be used, though.)*
+There is, in fact, a way to ask KBUS to only deliver one copy of messages with
+a given name, the ``want_messages_once`` method, but I still have *some*
+reservations about its use, and anyway, in this case it makes more sense for
+Guildenstern just to unbind from ``$.Actor.*``.
 
-Guildenstern can then reply:
+.. [[[
+    g.do("guildenstern.unbind('$.Actor.*')")
+.. ]]]
+
+
+Regardless, Guildenstern can then reply:
 
 .. [[[
     g.do("rep = reply_to(req, 'Yes, yes I was')",
@@ -333,9 +339,14 @@ Of course, the audience was listening.
     a.show()
 .. ]]]
 
--------------------------------------------------------------------------------
-
-Stateful transactions - explanations to be added later.
+Stateful requests
+-----------------
+Sometimes it is useful to accumulate state at one end of a conversation. In
+such cases, the Sender wants to be sure that the same Replier is replying to
+any Requests. If the original Replier unbinds, or even disconnects from the
+Ksock, and someone else binds as Replier instead, that new someone will
+clearly not have the requisite state, and thus the Sender would like to know
+that this has occurred.
 
 .. [[[
     r.do("# About to start tossing coins",
@@ -347,21 +358,10 @@ Stateful transactions - explanations to be added later.
     g.do("req = guildenstern.read_next_msg()",
          "guildenstern.send_msg(reply_to(req, 'Yes, yes I shall'))",
          "guildenstern.bind('$.Actor.CoinToss', True)",
-         "heads = 0")
-.. ]]]
-
-.. [[[
-    r.do("rep = rosencrantz.read_next_msg()",
-         "print rep.from_",
-         "# Throws a head",
-         "from kbus import stateful_request",
-         "sreq = stateful_request(rep, '$.Actor.CoinToss', 'Head')",
-         "rosencrantz.send_msg(sreq)")
-.. ]]]
-
-.. [[[
-    g.do("while True:",
+         "heads = 0",
+         "while True:",
          "    toss = guildenstern.wait_for_msg()",
+         "    print toss",
          "    if toss.data == 'Head':",
          "       print 'A head - amazing'",
          "       heads += 1",
@@ -372,14 +372,34 @@ Stateful transactions - explanations to be added later.
 .. ]]]
 
 .. [[[
+    r.do("rep = rosencrantz.read_next_msg()",
+         "print rep.from_",
+         "# Throws a head",
+         "from kbus import stateful_request",
+         "sreq = stateful_request(rep, '$.Actor.CoinToss', 'Head')",
+         "print sreq",
+         "rosencrantz.send_msg(sreq)")
+.. ]]]
+
+The ``stateful_request`` is a convenience for preparing stateful request
+messages based on an earlier Reply. It takes the ``from_`` field from the
+Reply, and uses it as the ``to`` for the new Request. Having a specific ``to``
+field is what makes the request stateful - sending it will fail if it is not
+going to be delivered to exactly that Ksock id.
+
+.. [[[
+    g.show()
+.. ]]]
+
+The same again:
+
+.. [[[
     r.do("count = rosencrantz.read_next_msg()",
          "print 'So,',count.data",
          "# Throws a head",
          "sreq = stateful_request(rep, '$.Actor.CoinToss', 'Head')",
          "rosencrantz.send_msg(sreq)")
 .. ]]]
-
-The same again:
 
 .. [[[
     g.show()
@@ -397,12 +417,14 @@ But, aha, Falstaff intervenes, and forces Guildenstern to disconnect:
 
 .. [[[
     g.do("<CONTROL-C>",
-         "print 'Ouch'",
+         "print 'Falstaff! No! Ouch!'",
          "guildenstern.close()")
 .. ]]]
 
-And attempts to hijack the conversation - although, of course, he has no idea
-of how many heads have been tossed, so would not actually be of any use:
+And Falstaff then binds as Replier to the ``CoinToss`` message name, in an
+attempt to hijack the conversation - although, of course, he has no idea
+of how many heads have been tossed, so would not actually be of any use in
+this conversation:
 
 .. [[[
     f = Terminal(4, "Falstaff")
@@ -411,15 +433,21 @@ of how many heads have been tossed, so would not actually be of any use:
          "falstaff.bind('$.Actor.CoinToss', True)")
 .. ]]]
 
-Innocently, Rosencrantz continues:
+Innocently, Rosencrantz continues, but since the intended recipient has gone
+away, the message cannot be sent:
 
 .. [[[
     r.do("sreq = stateful_request(rep, '$.Actor.CoinToss', 'Head')",
          "rosencrantz.send_msg(sreq)")
 .. ]]]
 
-And discovers that, in fact, state has been lost, skulduggery has been done,
-and so forth.
+And Rosencrantz discovers that, in fact, state has been lost, skulduggery has
+been done, and so forth.
+
+The Python interface is not terribly helpful with interpreting ``IOError``
+error numbers, but there is a useful commandline utility that reports both the
+standard Unix meaning of an ``errno``, and also the specfic KBUS meaning (as
+given in the KBUS documentation). So, for instance:
 
 ::
 
@@ -436,7 +464,10 @@ From the audience's point of view:
     a.show()
 .. ]]]
 
--------------------------------------------------------------------------------
+Tidying up
+----------
+
+    *Just to show that these are real Python processes.*
 
 And to end things...
 
@@ -461,30 +492,29 @@ Tidy everyone else up as well (showing that no-one has any messages left):
          "exit()")
 .. ]]]
 
--------------------------------------------------------------------------------
-
-So, in summary:
-
+Summary
+-------
 * To send or receive messages, a process opens a Ksock.
 * A process can send messages (be a Sender).
 * A process can bind to receive messages (be a Listener) by message name.
 * When binding to a message name, wildcards can be used.
 * When binding to a message name, a process can say it wants to receive
   Requests with that name (be a Replier)
-* It is not an error to send an ordinary message if no-one is listening.
-* It is an error to send a Request if there is no Replier.
 * There can only be one Replier for a given message name.
 * There can be any number of Listeners for a given message name.
+* It is not an error to send an ordinary message if no-one is listening.
+* It is an error to send a Request if there is no Replier.
 * Stateful Reqests insist that the expected Replier is replying.
 
 .. note:: Running the examples in this introduction requires having
-   the KBUS kernel module installed. If this is not already done, and you have
-   the KBUS sources, then ``cd`` to the kernel module directory (i.e.,
-   ``kbus`` in the sources) and do::
+   the KBUS kernel module installed. Typically, on Ubuntu, this means
+   doing::
 
-             make
-             make rules
-             sudo insmod kbus.ko
+           svn checkout http://kbus.googlecode.com/svn/trunk/ kbus 
+           cd kbus/kbus
+           make
+           sudo make rules
+           sudo insmod kbus.ko
 
    When you've finished the examples, you can remove the kernel module again
    with::
@@ -495,21 +525,15 @@ So, in summary:
    the kernel module - the second number in each message id will be different
    (although always ascending) otherwise.
 
----
-Why
----
-
-.. Taken from the Kynesim blog post
+--------------------------
+Why - The reasons for KBUS
+--------------------------
 
 So why are we developing KBUS, rather than using some other messaging system?
 
-  (I'm going to assume you've seen the previous blog items on KBUS, and/or
-  read the KBUS documentation on its Google code page.)
-
-.. more
-
-Our background
---------------
+Background
+----------
+I work for Kynesim (http://www.kynesim.co.uk) in Cambridge, UK.
 We work primarily in the embedded world, particularly on Set-Top Boxes (STBs).
 As such, typical software elements include video and audio decoders (or the
 interfaces to them, if this is done by hardware), user interface via remote
@@ -571,7 +595,7 @@ We've striven for simple names for things:
   ``in_reply_to``, etc.) are hopefully not too hard to understand from their
   names.
 
-* I'm sorry about Limpets.
+.. * I'm sorry about Limpets.
 
 Interfaces
 ~~~~~~~~~~
@@ -601,6 +625,9 @@ The KBUS kernel module
 Using a kernel module means that:
 
 * We can have a file interface, which makes KBUS easier to use.
+* We can expect a guarantee of being told when a Ksock has closed, including
+  if it has been closed because the process that opened it has crashed. This
+  type of guarantee is much harder to attain in user space.
 * We can have a real expectation of our "daemon" not crashing (it is much
   easier to write a kernel module that is reliable, partly because there are
   so many constraints on how one does it, partly because one is executing in a
@@ -610,18 +637,15 @@ Using a kernel module means that:
   modules are expected to use the provided mechanisms for handling lists
   and other datatypes. This avoids a lot of reinventing the wheel, or
   dependency on other libraries which might not be present.
-* We benefit from kernel strategies on memory management, copying, etc.
 * The kernel hides a lot of the complicated stuff (both at the top and bottom
   level) from us, so we can't do it wrong (well, it's much harder). For
   instance, ``read`` and ``write`` at the user level get filtered down into
   more predictable calls at the kernel module level.
+* We benefit from kernel strategies on memory management, copying, etc.
 * We stand to gain from the kernel handling such issues as multiple CPUs,
   threading and so on.
 * With KBUS being in the kernel address space, we should benefit from less
   context switching.
-* We can realistically expect to be told when a Ksock has closed, including if
-  it has been closed because the process that opened it has crashed. This type
-  of guarantee is much harder to attain in user space.
 
 Messages
 ~~~~~~~~
@@ -634,7 +658,8 @@ mechanisms for managing messages.
     of course, one can use other mechanisms as one wishes.)
 
 As indicated in the section on naming, the fields in the header aim to be easy
-to understand, and we try to define *just* the fields we need.
+to understand, and we try to define *just* the fields we need. Unused fields
+are always zero.
 
 Predictable delivery
 --------------------
@@ -649,22 +674,23 @@ So:
 * If a sender attempts to send a Request, but does not have room on its
   message queue for the (corresponding) Reply, then the message will not be
   sent, and the send will fail. At the "bare Unix" level, this means that the
-  ``send`` IOCTL returns an error - the failure is immediate.
+  ``send`` IOCTL returns a ``-ENOLCK`` error - the failure is immediate.
 
 * If a replier cannot receive a particular message, because its queue is full,
-  then the message will not be sent, and the send will fail with an error.
-  Again, this failure is immediate.
+  then the message will not be sent, and the send will fail with a ``-EBUSY``
+  error. Again, this failure is immediate.
 
 * If a message has the ALL_OR_FAIL flag set, then a send will only succeed if
   the message could be added to all the (intended) recipient’s message
-  queues (listeners as well).  Otherwise, ``send`` returns -EBUSY.
+  queues (listeners as well).  Otherwise, ``send`` returns a ``-EBUSY``
+  error. Again, failure is immediate.
 
 * If a message has the ALL_OR_WAIT flag set, then a send will only succeed if
   the message could be added to all the (intended) recipient’s message
-  queues (listeners as well).  Otherwise ``send`` returns -EAGAIN.
-
-  (The sender then needs to discard the message, or play the
-  ``poll``/``select`` game to wait for the send to finish).
+  queues (listeners as well).  Otherwise ``send`` returns a ``-EAGAIN`` error.
+  Again, failure is immediate, and the sender then needs to discard the
+  message, or play the ``poll``/``select`` game to wait for the send to
+  finish).
 
 Note that we believe these last two mechanisms are primarily of use when
 debugging systems.
@@ -679,8 +705,8 @@ If the replier can't give a Reply, KBUS will generate one (e.g.,
 
 Message order is the same for all
 ---------------------------------
-It is important that if sender R sends message M(r) on KBUS device S, and
-sender G sends message M(g) on the same KBUS, then all recipients of both
+It is important that if sender R sends a message on a particular KBUS device,
+and sender G sends a message on the same KBUS, then all recipients of both
 messages will see them in the same order.
 
     (Imagine sending instructions to a video decoder and a video recorder.
@@ -718,90 +744,18 @@ metaphorical bowl, and thus cannot communicate with R and G.
 
 *(but, limpets...)*
 
-.. Are we Pythonic yet?
-   --------------------
-   Well, it's an aim. For quick amusement, we can look at the Zen of Python and
-   try to see how we're doing:
-   
-   ::
-   
-     >>> import this
-     Beautiful is better than ugly.
-   
-   I can't really judge that, as I'm too close!
-   
-   ::
-   
-     Explicit is better than implicit.
-     Simple is better than complex.
-     Complex is better than complicated.
-   
-   Messaging is complex, we try not to make it complicated to do.
-   
-   We also try to implement only what we need, not "other stuff that might be
-   useful".
-   
-   ::
-   
-     Flat is better than nested.
-   
-   I think KBUS is a "flat" system.
-   
-   ::
-   
-     Sparse is better than dense.
-   
-   OK... not sure how that applies.
-   
-   ::
-   
-     Readability counts.
-   
-   Again, you'll have to judge - I hope we're making a system that helps provide
-   readable code.
-   
-   ::
-   
-     Special cases aren't special enough to break the rules.
-     Although practicality beats purity.
-   
-   That's a difficult balance to judge - we're trying.
-   
-   ::
-   
-     Errors should never pass silently.
-     Unless explicitly silenced.
-   
-   These definitely *are* KBUS aims.
-   
-   ::
-   
-     In the face of ambiguity, refuse the temptation to guess.
-     There should be one-- and preferably only one --obvious way to do it.
-     Although that way may not be obvious at first unless you're Dutch.
-     Now is better than never.
-     Although never is often better than *right* now.
-   
-   Hmm.
-   
-   ::
-   
-     If the implementation is hard to explain, it's a bad idea.
-     If the implementation is easy to explain, it may be a good idea.
-   
-   These apply - I hope we're getting the balance right.
-   
-   ::
-   
-     Namespaces are one honking great idea -- let's do more of those!
-   
-   Erm...  KBUS appears to be noticeably lacking in the namespaces arena.
-
 Why not use?
 ------------
 What else could we have used?
 
-There appear to be two main things we could have considered, DBUS and zeromq.
+POSIX message queues
+~~~~~~~~~~~~~~~~~~~~
+Linux systems provide POSIX message queues, via the ``mqueue`` system. This
+was not present before 2.6.2, which is one reason I didn't consider it(!). It
+apears to be intended for use in realtime systems, where message sending needs
+to be fast, but there are not large numbers of messages.
+
+*Provide some more information, based on the man pages...*
 
 DBUS
 ~~~~
@@ -855,9 +809,6 @@ I must have missed systems that I really should know about.
 (Although note I'm ignoring many "enterprise space" systems, which often do
 seek guarantees of delivery, but at the cost of being an enterprise system.)
 
-.. note:: There is also the simple Linux/POSIX message system, check its name,
-   but that doesn't address various of the issues. Explain...
-
 ----------------
 Example messages
 ----------------
@@ -882,11 +833,191 @@ Maybe mention:
 -------
 Limpets
 -------
+The problem, in brief
+---------------------
+By design, KBUS does not allow message sending between KBUS devices.
 
-.. note:: I don't believe there will be room to get such into the slide
-   show(!), but perhaps something should go into the paper? At least a mention
-   that there is something to look at?
+Also, KBUS the-kernel-module only provides message sending on a single
+machine.
 
+In the KBUS tradition of trying to provide simple, but just sufficient,
+solutions, KBUS Limpets allow intercommunication between pairs of KBUS
+devices, possibly on different machines.
+
+Summary
+-------
+A Limpet proxies KBUS message between a KBUS device and another Limpet.
+
+Thus one has a connection something like::
+
+    KBUS<x> <----> L<x> : L<y> <----> KBUS<y>
+
+The paired Limpets communicate via a socket.
+
+To someone talking to KBUS<x>, it should appear as if messages to/from someone
+using KBUS<y> are sent/received directly. In particular, Requests and Replies
+(including Stateful Requests) are proxied transparently.
+
+Restrictions and caveats
+------------------------
+There are various restrictions on what Limpets can do and how they must be
+used. These are mostly intrinsic in the approach taken, and avoiding them
+would require doing something more sophisticated.
+
+* The name is unintuitive. Sorry.
+
+* All Limpets that can be reached by a message must have distinct network ids.
+
+      Limpet network ids are used to identify the Limpet's pair, and also
+      for determining if a message has originated with this particular Limpet.
+      If the network ids are not unique, this will go horribly wrong.
+
+* Limpets do not support closed loops. Thus the "network" formed by Limpets
+  and KBUS devices must be "open" - for instance, a tree structure or star.
+
+      If a loop is formed in the network, messages may go round and round
+      forever. And other bad stuff.
+
+* When starting up a Limpet pair, one must be designated the server and the
+  other the client (in the traditional socket handling manner). This is a
+  nuisance, but doing otherwise would be more complex, and possibly
+  unreliable.
+
+* Don't connect both ends of a Limpet pair to the same KBUS device. Just
+  don't.
+
+* Limpets intrinsically assume a "safe" network, i.e., there is no way of
+  "proving" that the end of a message passing chain is a proper Limpet, rather
+  than someone spoofing one.
+
+      In particular, if we have a chain (e.g., x->K1->L1:L2->K2->L3:L4->K3->y) and
+      are passing through a Stateful Request, L2 has to trust that the Replier
+      for the message on K2 is actually a Limpet who is going to pass the
+      message on (ultimately to y). The message is only marked with who it was
+      originally from (x) and who it is aimed at (y), and if L3 is not
+      actually a Limpet (but someone who has taken its place), there is little
+      that we can do about it.
+
+* KBUS itself is intended to give a very good guarantee that a Request will
+  always generate a Reply (of some sort). Whilst the Limpet system tries to
+  provide a reasonably reliable mechanism, there is no way that it can be as
+  robust in this matter as just talking to a KBUS device.
+
+* Limpets default to proxying "$.*" (i.e., all messages). It is possible to
+  proxy something different, but this is untested, and actually of unproven
+  utility (I just had a feeling it might be useful). So if you try, cross your
+  fingers and let me know the results.
+
+* It *is* possible to tell if a message is going through Limpets, by
+  inspection of the message id (the network id will be set when it is
+  intermediate networks), and the use of the "originally from" and "finally
+  to" fields. Thus the use of Limpets is not strictly transparent.
+
+  Also, there are some specialised messages returned only by Limpets.
+
+  I do not believe this to be a problem. It may possibly be an advantage.
+
+* The most important problem with Limpets is that they are not (at the moment)
+  particularly well tested. Although I've done a fair amount of paper-and-pen
+  figuring of message/KBUS/Limpet interaction, and some testing, it is still
+  possible that I've missed a whole chunk of necessary functionality. So
+  please treat the whole thing as heavily ALPHA for the moment.
+
+Note that KBUS does not provided the full implementation necessary for Limpets
+- what it provides is the KBUS-related infrastructure necessary to do the
+KBUS<->Limpet communications.
+
+With goldfish bowls
+-------------------
+Consider a particular machine as a goldfish bowl. Inside is a KBUS kernel
+module, and the contents of the bowl communicate with this (and thus each
+other) in the normal KBUS manner.
+
+.. image:: images/05_fish_talk.png
+   :width: 5cm
+
+..   :width:  370px
+..   :height: 306px
+..   :scale:  66
+
+Now consider another goldfish bowl. We'd like to be able to make the two KBUS
+kernel modles (one in each) communicate.
+
+So, let's place a limpet on the inside of each bowl's glass. Each limpet can
+communicate with the other using a simple laser communications link (so
+they're clever cyborg limpets), and each limpet can also communicate with its
+KBUS kernel module.
+
+.. image:: images/06_limpet_pair.png
+   :width: 10.3cm
+
+..   :width:  787px
+..   :height: 306px
+..   :scale:  66
+
+So the Limpet needs to proxy things for KBUS users in its bowl to the other
+bowl, and back again.
+
+So if goldfish G in Bowl 3 wants to bind as a listener to message ``$.Gulp``,
+then we want the Limpet in Bowl 0 to forward all ``$.Gulp`` messages from its
+KBUS kernel module, and the Limpet in Bowl 3 then needs to echo them to the
+KBUS kernel module in its bowl. So when goldfish A sends a ``$.Gulp`` message,
+goldfish G will hear it:
+
+.. image:: images/07_A_talks_to_G.png
+   :width: 10.3cm
+
+..   :width:  787px
+..   :height: 307px
+..   :scale:  66
+
+What if goldfish G wants to bind as a Replier for message ``$.Gulp``? Limpets
+handle that as well, by binding as a proxy-replier in the other goldfish
+bowls.
+
+So:
+
+* Goldfish G binds as a replier for ``$.Gulp``.
+* KBUS device 3 sends out a Replier Bind Event message, saying that goldfish G
+  has bound as a replier for ``$.Gulp``.
+* Limpet 2 receives this message, and tells Limpet 1.
+* Limpet 1 binds as a replier for ``$.Gulp``, on KBUS device 0.
+
+This allows goldfish A and G to interact with a Request/Reply sequence as
+normal:
+
+* Goldfish A send a request ``$.Gulp``.
+* Limpet 1 receives it, as the Replier for that message on KBUS device 0.
+* Limpet 1 sends the message to Limpet 2.
+* Limpet 2 sends the message, as a Request, to KBUS device 3.
+* Goldfish G receives the message, marked as a Request to which it should
+  reply.
+* Goldfish G replies to the request.
+* Limpet 2 receives the reply (since it issued the request on this KBUS
+  device).
+* Limpet 2 sends the message to Limpet 1.
+* Limpet 1 uses the message to form *its* reply, which it then sends to
+  KBUS device 0, since in this bowl *it* is the replier.
+* Goldfish A receives the reply.
+
+Handling Stateful Requests (and Replies) needs a bit more infrastructure, but
+is essentially handled by the same mechanism, although we need to show it in a
+bit more detail this time.
+
+    (Stateful transactions use the message header ``orig_from`` and
+    ``final_to`` fields. When a message is sent through a Limpet, the
+    ``orig_from`` indicates both the original Ksock (goldfish G) and also
+    the first Limpet (Limpet 2). This can then be copied to the ``final_to``
+    field of a Stateful Request to indicate that it really is goldfish G that
+    is wanted, even though goldfish A can't "see" them.)
+
+These mechanisms will also work when there are intermediate bowls:
+
+.. image:: images/08_3_bowls.png
+   :width: 15cm
+
+..   :width:  790px
+..   :height: 210px
 
 
 .. vim: set filetype=rst tabstop=8 softtabstop=2 shiftwidth=2 expandtab:
