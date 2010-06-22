@@ -744,6 +744,47 @@ metaphorical bowl, and thus cannot communicate with R and G.
 
 *(but, limpets...)*
 
+Documentation
+-------------
+It didn't make the list of "Aims", because I just assumed it as a necessary
+part of *any* project, but KBUS also comes with documentation. Indeed, the
+initial documentation came before the first implementation.
+
+Particularly in the first phases of development, we would cycle through:
+
+* Describe how features of KBUS should (probably) work
+* Look at implementing (the next part of) that
+* Discover whether it made sense
+* Refine documentation or implementation, as appropriate
+
+Sometimes following through the logic of the specification in the
+documentation would lead to inconsistencies (so let's not do it like that,
+then), and sometimes doing the actual implenentation would lead to "ah, in
+that case" moments, feeding back into the documentation.
+
+Reading "Coder at Work", by Peter Seibel, I was struck by the following, which
+feels somewhat similar:
+
+  """We met every morning at coffee and had a long conversation -- about an
+  hour to two hours -- and we covered the whiteboard in stuff. I'd take loads
+  of notes -- I wrote all the documentation immediately and they wrote all the
+  code. Sometimes I'd write a bit of code as well. And when I was writing the
+  documentation I'd discover, I can't describe this, we have to change it. Or
+  they would run into me and say, "Nah, it doesn't work; this idea we had this
+  morning, because of this, this, this, and this it doesn't work." At the end
+  of the day we either got to the point where we got all the documentation and
+  all the code or enough of the code and enough of the documentation that we
+  knew it was going to work. And then we called it a day."""
+
+  -- Joe Armstrong (Erlang), on designing and writing OTP (Open Telecom Platform,
+  "a middleware platform for building high availability, fault tolerant,
+  distributed, soft real-time systems" -- sort of a .NET for Erlang), page
+  230.
+
+Being able to produce quick examples with the Python binding was especially
+important for this process - a flavour of how a feature would work (or not)
+could be gotten as soon as something was being implemented.
+
 Why not use?
 ------------
 What else could we have used?
@@ -1018,6 +1059,5 @@ These mechanisms will also work when there are intermediate bowls:
 
 ..   :width:  790px
 ..   :height: 210px
-
 
 .. vim: set filetype=rst tabstop=8 softtabstop=2 shiftwidth=2 expandtab:
