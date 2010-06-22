@@ -12,6 +12,8 @@
 
 **KBUS**
 
+A simple messaging system
+
 .. style::
    :font_size: 32
 
