@@ -1,3 +1,10 @@
+.. style::
+   :layout.viewport: w/40,h/10,w-(w/40),h-(2*h/10)
+
+.. layout::
+   :quad: C#ccffcc;V0,h;V0,(h-(h/10));Vw,(h-(h/10));Vw,h  # top
+   :quad: C#ccffcc;V0,0;V0,h/10;Vw,h/10;Vw,0              # bottom
+
 .. page-style::
    :layout.valign: center
    :align: center
@@ -22,8 +29,8 @@ http://code.google.com/p/kbus/
    :layout.valign: top
    :align: left
    :font_size: 32
-   :footer.position: w,0
-   :footer.hanchor: right
+   :footer.position: 0,0
+   :footer.hanchor: left
    :footer.vanchor: bottom
 
 .. footer:: EuroPython 2010
