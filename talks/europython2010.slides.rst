@@ -47,6 +47,17 @@ http://code.google.com/p/kbus/
 
 .. footer:: EuroPython 2010
 
+A simple introduction to using KBUS
+-----------------------------------
+
+With some actors and an audience...
+
+...and using Python.
+
+------------------------------------------------------------------------------
+
+First our actor needs to connect to KBUS itself, by opening a Ksock:
+
 .. compound::
 
      *Terminal 1: Rosencrantz* ::
@@ -59,7 +70,16 @@ http://code.google.com/p/kbus/
        >>> print rosencrantz
        Ksock device 0, id 113, mode read/write
 
+.. note::
+
+  This specifies which KBUS device to connect to. If KBUS is installed, then
+  device ``0`` will always exist, so it is a safe choice. The default is to open
+  the device for read and write - this makes sense since we will want to write
+  messages to it.
+
 ------------------------------------------------------------------------------
+
+They can send a message:
 
 .. compound::
 
@@ -70,7 +90,27 @@ http://code.google.com/p/kbus/
        >>> rosencrantz.send_msg(ahem)
        MessageId(0, 337)
 
+but no-one is listening.
+
+.. note::
+
+  The Message call creates a new message named ``$.Actor.Speak``, with the
+  message data ``"Ahem"``.
+
+      *(All message names are composed of ``$`` followed by a series of
+      dot-separated parts.)*
+
+  The next line sends it. For convenience, the ``send_msg`` method also
+  returns the *message id* assigned to the message by KBUS - this can be used
+  to identify a specific message.
+
+  This will succeed, but doesn't do anything very useful, because no-one is
+  listening. So, we shall need a second process, which we shall start in a
+  new terminal.
+
 ------------------------------------------------------------------------------
+
+An audience, to listen:
 
 .. compound::
 
@@ -82,6 +122,17 @@ http://code.google.com/p/kbus/
        >>> from kbus import *
        >>> audience = Ksock(0)
        >>> audience.bind('$.Actor.Speak')
+
+.. note::
+
+  Here, the audience has opened the same KBUS device (messages cannot be sent
+  between different KBUS devices). We've still opened it for
+  write, since they might, for instance, want to be able to send ``$.Applause``
+  messages later on. They've then 'bound to' the ``$.Actor.Speak`` message,
+  which means they will receive any messages that are sent with that name.
+
+      (In fact, all messages with that name sent by anyone, not just by
+      rosencrantz.)
 
 ------------------------------------------------------------------------------
 
@@ -99,7 +150,14 @@ http://code.google.com/p/kbus/
        >>> audience.read_next_msg()
        Message('$.Actor.Speak', data='Ahem', from_=113L, id=MessageId(0, 338))
 
+.. note::
+
+  Note that this shows that the message received has the same ``MessageId`` as
+  the message sent (which is good!).
+
 ------------------------------------------------------------------------------
+
+A friendlier representation of the message is given if one prints it:
 
 .. compound::
 
@@ -108,6 +166,10 @@ http://code.google.com/p/kbus/
        >>> print _
        <Announcement '$.Actor.Speak', id=[0:338], from=113, data='Ahem'>
 
+.. note::
+
+  "Plain" messages are also termed "announcements", since they are just being
+  broadcast to whoever might be listening.
 
 .. compound::
 
@@ -116,7 +178,14 @@ http://code.google.com/p/kbus/
        >>> rosencrantz.ksock_id()
        113L
 
+.. note::
+
+   Rosencrantz's Ksock id is the same as that indicated in the ``from_``
+   field.
+
 ------------------------------------------------------------------------------
+
+And there's nothing else to hear:
 
 .. compound::
 
@@ -125,7 +194,7 @@ http://code.google.com/p/kbus/
        >>> print audience.read_next_msg()
        None
 
-------------------------------------------------------------------------------
+So let's be an efficient audience:
 
 .. compound::
 
@@ -138,7 +207,14 @@ http://code.google.com/p/kbus/
        ...    print audience.read_next_msg()
        ... 
 
+.. note::
+
+  (although perhaps with more error checking, and maybe even a timeout, in a
+  real example).
+
 ------------------------------------------------------------------------------
+
+And so now:
 
 .. compound::
 
@@ -149,8 +225,6 @@ http://code.google.com/p/kbus/
        >>> rosencrantz.send_msg(Message('$.Actor.Speak', 'Can you hear me?'))
        MessageId(0, 340)
 
-------------------------------------------------------------------------------
-
 .. compound::
 
      *Terminal 2: Audience* ::
@@ -159,6 +233,8 @@ http://code.google.com/p/kbus/
        <Announcement '$.Actor.Speak', id=[0:340], from=113, data='Can you hear me?'>
        
 ------------------------------------------------------------------------------
+
+Another participant:
 
 .. compound::
 
@@ -180,6 +256,10 @@ http://code.google.com/p/kbus/
 
        >>> guildenstern.bind('$.Actor.*')
 
+.. note::
+
+  Here, guildenstern is binding to any message whose name starts with
+  ``$.Actor.``.
 
 .. compound::
 
@@ -194,7 +274,14 @@ http://code.google.com/p/kbus/
        ...    print audience.wait_for_msg()
        ... 
 
-------------------------------------------------------------------------------
+.. note::
+ 
+  In retrospect this, of course, makes sense for the audience, too.
+
+  (as a convenience, the Ksock class provides the ``wait_for_msg()`` wrapper
+  around ``select.select``, which is shorter to type...).
+
+  And maybe rosencrantz will want to hear his colleague:
 
 .. compound::
 
@@ -203,6 +290,10 @@ http://code.google.com/p/kbus/
        >>> rosencrantz.bind('$.Actor.*')
 
 ------------------------------------------------------------------------------
+
+.. note::
+
+  So let guildenstern speak:
 
 .. compound::
 
@@ -214,8 +305,6 @@ http://code.google.com/p/kbus/
        ... print guildenstern.read_next_msg()
        <Announcement '$.Actor.Speak', id=[0:341], from=115, data='Pssst!'>
 
-------------------------------------------------------------------------------
-
 .. compound::
 
      *Terminal 1: Rosencrantz* ::
@@ -224,8 +313,6 @@ http://code.google.com/p/kbus/
        >>> print msg
        <Announcement '$.Actor.Speak', id=[0:341], from=115, data='Pssst!'>
 
-------------------------------------------------------------------------------
-
 .. compound::
 
      *Terminal 2: Audience* ::
@@ -233,7 +320,17 @@ http://code.google.com/p/kbus/
        <Announcement '$.Actor.Speak', id=[0:341], from=115, data='Pssst!'>
        <Announcement '$.Actor.Speak', id=[0:341], from=115, data='Pssst!'>
 
+.. note::
+
+  This is because the audience has bound to the message twice - it is hearing it
+  once because it asked to receive every ``$.Actor.Speak`` message, and again
+  because it asked to hear any message matching ``$.Actor.*``.
+
 ------------------------------------------------------------------------------
+
+.. note::
+
+  The solution is simple - ask not to hear the more specific version:
 
 .. compound::
 
@@ -253,13 +350,28 @@ http://code.google.com/p/kbus/
 
 ------------------------------------------------------------------------------
 
+KBUS also supports Requests and Replies:
+
 .. compound::
 
      *Terminal 3: Guildenstern* ::
 
        >>> guildenstern.bind('$.Actor.Ask.Guildenstern', True)
 
+.. note::
+
+       *(Only one person may be bound as Replier for a particular message
+       name at any one time, so that it is unambiguous who is expected to do
+       the replying.*
+
+       *Also, if a Sender tries to send a Request, but no-one has bound to that
+       message name as a Replier, then an error is raised (contrast that with
+       ordinary messages, where if no-one is listening, the message just gets
+       ignored).)*
+
 ------------------------------------------------------------------------------
+
+So if Rosencrantz asks:
 
 .. compound::
 
@@ -269,8 +381,6 @@ http://code.google.com/p/kbus/
        >>> req = Request('$.Actor.Ask.Guildenstern', 'Were you speaking to me?')
        >>> rosencrantz.send_msg(req)
        MessageId(0, 342)
-
-------------------------------------------------------------------------------
 
 .. compound::
 
@@ -282,6 +392,8 @@ http://code.google.com/p/kbus/
 
 ------------------------------------------------------------------------------
 
+Guildenstern hears:
+
 .. compound::
 
      *Terminal 3: Guildenstern* ::
@@ -290,8 +402,6 @@ http://code.google.com/p/kbus/
        >>> print req
        <Request '$.Actor.Ask.Guildenstern', id=[0:342], from=113, flags=0x3 (REQ,YOU), data='Were you speaking to me?'>
 
-------------------------------------------------------------------------------
-
 .. compound::
 
      *Terminal 3: Guildenstern* ::
@@ -299,7 +409,7 @@ http://code.google.com/p/kbus/
        >>> print req.wants_us_to_reply()
        True
 
-------------------------------------------------------------------------------
+And again:
 
 .. compound::
 
@@ -309,7 +419,15 @@ http://code.google.com/p/kbus/
        >>> print msg
        <Request '$.Actor.Ask.Guildenstern', id=[0:342], from=113, flags=0x1 (REQ), data='Were you speaking to me?'>
 
+.. note::
+
+  Looking at the two messages, the first is the Request specifically to
+  guildenstern, which he is meant to answer (and that is what the ``YOU`` in
+  the flags means).
+
 ------------------------------------------------------------------------------
+
+Let's fix that "twice":
 
 .. compound::
 
@@ -317,8 +435,20 @@ http://code.google.com/p/kbus/
 
        >>> guildenstern.unbind('$.Actor.*')
 
+.. note::
+
+  As we should expect, guildenstern is getting the message twice, once because
+  he has bound as a listener to '$.Actor.*', and once because he is bound as a
+  Replier to this specific message.
+
+      *(There is, in fact, a way to ask KBUS to only deliver one copy of
+      a given message, and if guildenstern had used that, he would only have
+      received the Request that was marked for him to answer. I'm still a little
+      undecided how often this mechanism should be used, though.)*
+
 ------------------------------------------------------------------------------
 
+Guildenstern replies:
 
 .. compound::
 
@@ -331,7 +461,14 @@ http://code.google.com/p/kbus/
        MessageId(0, 343)
        >>> guildenstern.read_next_msg()
 
+.. note::
+
+  The ``reply_to`` convenience function crafts a new ``Reply`` message, with the
+  various message parts set in an appropriate manner.
+
 ------------------------------------------------------------------------------
+
+Rosencrantz hears:
 
 .. compound::
 
@@ -341,7 +478,16 @@ http://code.google.com/p/kbus/
        >>> print rep
        <Reply '$.Actor.Ask.Guildenstern', id=[0:343], to=113, from=115, in_reply_to=[0:342], data='Yes, yes I was'>
 
+.. note::
+
+  Note that Rosencrantz didn't need to bind to this message to receive it - he
+  will always get a Reply to any Request he sends (KBUS goes to some lengths to
+  guarantee this, so that even if Guildenstern closes his Ksock, it will
+  generate a "gone away" message for him).
+
 ------------------------------------------------------------------------------
+
+And the audience hears all:
 
 .. compound::
 
@@ -352,12 +498,15 @@ http://code.google.com/p/kbus/
        
 Stateful requests
 -----------------
-Sometimes it is useful to accumulate state at one end of a conversation. In
-such cases, the Sender wants to be sure that the same Replier is replying to
-any Requests. If the original Replier unbinds, or even disconnects from the
-Ksock, and someone else binds as Replier instead, that new someone will
-clearly not have the requisite state, and thus the Sender would like to know
-that this has occurred.
+Sometimes state is useful...
+
+.. note::
+
+  at one end of a conversation. In such cases, the Sender wants to be sure
+  that the same Replier is replying to any Requests. If the original Replier
+  unbinds, or even disconnects from the Ksock, and someone else binds as
+  Replier instead, that new someone will clearly not have the requisite state,
+  and thus the Sender would like to know that this has occurred.
 
 ------------------------------------------------------------------------------
 
@@ -521,6 +670,26 @@ that this has occurred.
        <Request '$.Actor.CoinToss', id=[0:348], to=115, from=113, flags=0x1 (REQ), data='Head'>
        <Reply '$.Actor.CoinToss', id=[0:349], to=113, from=115, in_reply_to=[0:348], data='Head count is 2'>
        
+
+
+.. note:: Running the examples in this introduction requires having
+   the KBUS kernel module installed. If this is not already done, and you have
+   the KBUS sources, then ``cd`` to the kernel module directory (i.e.,
+   ``kbus`` in the sources) and do::
+
+             make
+             make rules
+             sudo insmod kbus.ko
+
+   When you've finished the examples, you can remove the kernel module again
+   with::
+
+             sudo rmmod kbus.ko
+
+   The message ids shown in the examples are correct if you've just installed
+   the kernel module - the second number in each message id will be different
+   (although always ascending) otherwise.
+
 
 Isolation
 ---------
