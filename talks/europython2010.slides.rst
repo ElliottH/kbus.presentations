@@ -1,9 +1,19 @@
+.. .. style::
+..    :layout.viewport: w/40,h/10,w-(w/40),h-(2*h/10)
+
+.. .. layout::
+..    :quad: C#ccffcc;V0,h;V0,(h-(h/10));Vw,(h-(h/10));Vw,h  # top
+..    :quad: C#ccffcc;V0,0;V0,h/10;Vw,h/10;Vw,0              # bottom
+
+.. Hmm. Specific values seem to be necessary to make it work reliably
+   (it would seem that 'w' and 'h' are not set very reliably for full
+   screen operation).
 .. style::
-   :layout.viewport: w/40,h/10,w-(w/40),h-(2*h/10)
+   :layout.viewport: 1024/40,768/10,1024-(1024/40),768-(2*768/10)
 
 .. layout::
-   :quad: C#ccffcc;V0,h;V0,(h-(h/10));Vw,(h-(h/10));Vw,h  # top
-   :quad: C#ccffcc;V0,0;V0,h/10;Vw,h/10;Vw,0              # bottom
+   :quad: C#ccffcc;V0,768;V0,(768-(768/10));V1024,(768-(768/10));V1024,768  # top
+   :quad: C#ccffcc;V0,0;V0,768/10;V1024,768/10;V1024,0              # bottom
 
 .. page-style::
    :layout.valign: center
