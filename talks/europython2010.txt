@@ -138,9 +138,9 @@ We can set the audience to listening for messages as they arrive using
 .. [[[
     a.do("import select",
           "while 1:",
-          "   (r,w,x) = select.select([audience], [], [])",
-          "   # At this point, r should contain audience",
-          "   print audience.read_next_msg()",
+          "  (r,w,x) = select.select([audience], [], [])",
+          "  # At this point, r should contain audience",
+          "  print audience.read_next_msg()",
           "")
 .. ]]]
 
@@ -184,7 +184,7 @@ In retrospect this makes sense for the audience, too - let's fix that.
     a.do("<CONTROL_C>",
         "audience.bind('$.Actor.*')",
          "while 1:",
-         "   print audience.wait_for_msg()",
+         "  print audience.wait_for_msg()",
          "")
 .. ]]]
 
@@ -228,8 +228,8 @@ The solution is simple - ask not to hear the more specific version.
     a.do("<CONTROL-C>",
          "audience.unbind('$.Actor.Speak')",
          "while 1:",
-         "   msg = audience.wait_for_msg()",
-         "   print msg",
+         "  msg = audience.wait_for_msg()",
+         "  print msg",
          "")
 .. ]]]
 
@@ -350,8 +350,9 @@ that this has occurred.
 
 .. [[[
     r.do("# About to start tossing coins",
-         "req = rosencrantz.send_msg(Request('$.Actor.Ask.Guildenstern',",
-         "'Will you count heads for me?'))")
+         "req = Request('$.Actor.Ask.Guildenstern',",
+         "'Will you count heads for me?')",
+         "rosencrantz.send_msg(req)")
 .. ]]]
 
 .. [[[
@@ -360,14 +361,14 @@ that this has occurred.
          "guildenstern.bind('$.Actor.CoinToss', True)",
          "heads = 0",
          "while True:",
-         "    toss = guildenstern.wait_for_msg()",
-         "    print toss",
-         "    if toss.data == 'Head':",
-         "       print 'A head - amazing'",
-         "       heads += 1",
-         "    else:",
-         "       print 'Bah, tails'",
-         "    guildenstern.send_msg(reply_to(toss, 'Head count is %d'%heads))",
+         "  toss = guildenstern.wait_for_msg()",
+         "  print toss",
+         "  if toss.data == 'Head':",
+         "    print 'A head - amazing'",
+         "    heads += 1",
+         "  else:",
+         "    print 'Bah, tails'",
+         "  guildenstern.send_msg(reply_to(toss, 'Head count is %d'%heads))",
          "")
 .. ]]]
 
@@ -480,14 +481,14 @@ Tidy everyone else up as well (showing that no-one has any messages left):
 
 .. [[[
     r.do("for msg in rosencrantz:",
-         "    print msg",
+         "  print msg",
          "",
          "exit()")
     print
     g.do("exit()")
     print
     f.do("for msg in falstaff:",
-         "    print msg",
+         "  print msg",
          "",
          "exit()")
 .. ]]]
