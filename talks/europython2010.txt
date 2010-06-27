@@ -702,7 +702,7 @@ Finally:
     consequent Reply (or Status) message, and only one such."""
 
 If the replier can't give a Reply, KBUS will generate one (e.g.,
-"``$.KBUS.Replier.Unbound``" or "``$.KBUS.ReplierGoneAway``").
+"``$.KBUS.Replier.Unbound``" or "``$.KBUS.Replier.GoneAway``").
 
 Message order is the same for all
 ---------------------------------
