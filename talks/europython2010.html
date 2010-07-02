@@ -1,0 +1,1408 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<title>KBUS: A simple messaging system</title>
+<meta name="author" content="Tony Ibbs" />
+<meta name="date" content="July 2010" />
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 5196 2007-06-03 20:25:28Z wiemann $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left {
+  clear: left }
+
+img.align-right {
+  clear: right }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font-family: serif ;
+  font-size: 100% }
+
+pre.literal-block, pre.doctest-block {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document" id="kbus-a-simple-messaging-system">
+<h1 class="title">KBUS: A simple messaging system</h1>
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr><th class="docinfo-name">Author:</th>
+<td>Tony Ibbs</td></tr>
+<tr><th class="docinfo-name">Contact:</th>
+<td><a class="first last reference external" href="mailto:tibs&#64;tonyibbs.co.uk">tibs&#64;tonyibbs.co.uk</a></td></tr>
+<tr><th class="docinfo-name">Date:</th>
+<td>July 2010</td></tr>
+<tr class="field"><th class="docinfo-name">Repository:</th><td class="field-body"><a class="reference external" href="http://code.google.com/p/kbus/">http://code.google.com/p/kbus/</a></td>
+</tr>
+</tbody>
+</table>
+<hr class="docutils" />
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#how-a-simple-introduction-to-using-kbus" id="id1">How - A simple introduction to using KBUS</a><ul>
+<li><a class="reference internal" href="#senders-and-listeners" id="id2">Senders and Listeners</a></li>
+<li><a class="reference internal" href="#requests-and-repliers" id="id3">Requests and Repliers</a></li>
+<li><a class="reference internal" href="#stateful-requests" id="id4">Stateful requests</a></li>
+<li><a class="reference internal" href="#tidying-up" id="id5">Tidying up</a></li>
+<li><a class="reference internal" href="#summary" id="id6">Summary</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#why-the-reasons-for-kbus" id="id7">Why - The reasons for KBUS</a><ul>
+<li><a class="reference internal" href="#background" id="id8">Background</a></li>
+<li><a class="reference internal" href="#aims" id="id9">Aims</a></li>
+<li><a class="reference internal" href="#simple-models" id="id10">Simple models</a><ul>
+<li><a class="reference internal" href="#names-for-things" id="id11">Names for things</a></li>
+<li><a class="reference internal" href="#interfaces" id="id12">Interfaces</a></li>
+<li><a class="reference internal" href="#the-kbus-kernel-module" id="id13">The KBUS kernel module</a></li>
+<li><a class="reference internal" href="#messages" id="id14">Messages</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#predictable-delivery" id="id15">Predictable delivery</a></li>
+<li><a class="reference internal" href="#message-order-is-the-same-for-all" id="id16">Message order is the same for all</a></li>
+<li><a class="reference internal" href="#isolation-of-buses" id="id17">Isolation of buses</a></li>
+<li><a class="reference internal" href="#documentation" id="id18">Documentation</a></li>
+<li><a class="reference internal" href="#why-not-use" id="id19">Why not use?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#limpets" id="id20">Limpets</a></li>
+</ul>
+</div>
+<div class="section" id="how-a-simple-introduction-to-using-kbus">
+<h1><a class="toc-backref" href="#id1">How - A simple introduction to using KBUS</a></h1>
+<div class="section" id="senders-and-listeners">
+<h2><a class="toc-backref" href="#id2">Senders and Listeners</a></h2>
+<p>This is intended as a very simple introduction to the basics of how to use
+KBUS. The examples are not realistic, but should give some flavour of the
+way that KBUS works.</p>
+<p>We shall start with a single &quot;actor&quot; in our virtual playlet:</p>
+<p>First our actor needs to connect to KBUS itself, by opening a Ksock:</p>
+<dl class="docutils">
+<dt>Introducing Rosencrantz</dt>
+<dd><div class="first last compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+Python 2.6.4 (r264:75706, Dec  7 2009, 18:45:15)
+[GCC 4.4.1] on linux2
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; from kbus import Ksock
+&gt;&gt;&gt; rosencrantz = Ksock(0)
+&gt;&gt;&gt; print rosencrantz
+Ksock device 0, id 1, mode read/write
+</pre>
+</div>
+</dd>
+</dl>
+<p>The argument to Ksock is the number of the KBUS device to connect to. If KBUS
+is installed, then device <tt class="docutils literal"><span class="pre">0</span></tt> will always exist, so it is a safe choice.</p>
+<p>The default is to open the device for read and write - this makes sense since
+we will want to write messages to it.</p>
+<p>Once we've done that, we can try creating and sending a message:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; from kbus import Message
+&gt;&gt;&gt; ahem = Message('$.Actor.Speak', 'Ahem')
+&gt;&gt;&gt; rosencrantz.send_msg(ahem)
+MessageId(0, 1)
+</pre>
+</div>
+</blockquote>
+<p>The call to Message creates a new message named <tt class="docutils literal"><span class="pre">$.Actor.Speak</span></tt>, with the
+message data <tt class="docutils literal"><span class="pre">&quot;Ahem&quot;</span></tt>.</p>
+<blockquote>
+<p><em>All message names are composed of a ``$`` followed by a series of
+dot-separated parts.</em></p>
+<p><em>Data doesn't have to be a string, it can be any sequence of bytes, but a
+simple string makes sense for these examples.</em></p>
+</blockquote>
+<p>The next line sends it. For convenience, the <tt class="docutils literal"><span class="pre">send_msg</span></tt> method also
+returns the <em>message id</em> assigned to the message by KBUS - this can be used
+to identify a specific message.</p>
+<blockquote>
+<p><em>When a message is created by a user, it does not have a message id.</em></p>
+<p><em>When the KBUS kernel module makes its internal copy of the message, it
+assigns it a new message id, which uniquely identifies the message on this
+KBUS device. Basically, the second number in the id is incremented for
+each message.</em></p>
+<p><em>(Note this is not quite the whole story, as KBUS behaves differently if
+given a message that already has an id set, but that's for use with
+Limpets, which we'll ignore for now.)</em></p>
+</blockquote>
+<p>This will succeed, but doesn't do anything very useful, because no-one is
+listening. So, we shall need a second process, which we shall start in a
+new terminal.</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+Python 2.6.4 (r264:75706, Dec  7 2009, 18:45:15)
+[GCC 4.4.1] on linux2
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; from kbus import *
+&gt;&gt;&gt; audience = Ksock(0)
+&gt;&gt;&gt; audience.bind('$.Actor.Speak')
+</pre>
+</div>
+</blockquote>
+<p>I don't recommend using <tt class="docutils literal"><span class="pre">from</span></tt> thing <tt class="docutils literal"><span class="pre">import</span> <span class="pre">*</span></tt>, but it does make
+use at the prompt easier, and thus KBUS is designed to be safe for this
+purpose.</p>
+<p>Here, the audience has opened the same KBUS device (messages cannot be sent
+between different KBUS devices). We've still opened it for
+write, since they might, for instance, want to be able to send <tt class="docutils literal"><span class="pre">$.Applause</span></tt>
+messages later on. They've then 'bound to' the <tt class="docutils literal"><span class="pre">$.Actor.Speak</span></tt> message,
+which means they will receive any messages that are sent with that name.</p>
+<blockquote>
+(In fact, all messages with that name sent by anyone, not just by
+rosencrantz.)</blockquote>
+<p>Now, if Rosencrantz sends the message again, the audience can receive it.</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rosencrantz.send_msg(ahem)
+MessageId(0, 2)
+</pre>
+</div>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; audience.read_next_msg()
+Message('$.Actor.Speak', data='Ahem', from_=1L, id=MessageId(0, 2))
+</pre>
+</div>
+</blockquote>
+<p>Note the new message has a new message id, and the message read by the
+audience has the same message id - i.e., is the same message.</p>
+<p>A friendlier representation of the message is given if one prints it:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; print _
+&lt;Announcement '$.Actor.Speak', id=[0:2], from=1, data='Ahem'&gt;
+</pre>
+</div>
+</blockquote>
+<p>&quot;Plain&quot; messages are termed &quot;announcements&quot;, since they are just being
+broadcast to whoever might be listening.</p>
+<p>The message also indicates who it is from (in the <tt class="docutils literal"><span class="pre">from_</span></tt> field). This gives
+the Ksock id of the Sender, which we can determine with:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rosencrantz.ksock_id()
+1L
+</pre>
+</div>
+</blockquote>
+<p>Since there was only one message sent, if the audience tries to listen again,
+they're not going to &quot;hear&quot; anything new:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; print audience.read_next_msg()
+None
+</pre>
+</div>
+</blockquote>
+<p>We can set the audience to listening for messages as they arrive using
+'select' in the traditional manner:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; import select
+&gt;&gt;&gt; while 1:
+...   (r,w,x) = select.select([audience], [], [])
+...   # At this point, r should contain audience
+...   print audience.read_next_msg()
+...
+</pre>
+</div>
+</blockquote>
+<p>(although perhaps with more error checking, and maybe even a timeout, in a
+real example).</p>
+<p>So now if Rosencrantz speaks...</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rosencrantz.send_msg(Message('$.Actor.Speak', 'Hello there'))
+MessageId(0, 3)
+&gt;&gt;&gt; rosencrantz.send_msg(Message('$.Actor.Speak', 'Can you hear me?'))
+MessageId(0, 4)
+</pre>
+</div>
+</blockquote>
+<p>...the audience should be able to hear him:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&lt;Announcement '$.Actor.Speak', id=[0:3], from=1, data='Hello there'&gt;
+&lt;Announcement '$.Actor.Speak', id=[0:4], from=1, data='Can you hear me?'&gt;
+</pre>
+</div>
+</blockquote>
+<p>Let's introduce another participant, also on the same KBUS device:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+Python 2.6.4 (r264:75706, Dec  7 2009, 18:45:15)
+[GCC 4.4.1] on linux2
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; from kbus import *
+&gt;&gt;&gt; guildenstern = Ksock(0)
+&gt;&gt;&gt; print guildenstern
+Ksock device 0, id 3, mode read/write
+</pre>
+</div>
+</blockquote>
+<p>We can start them listening as well - this time using a wildcard.</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; guildenstern.bind('$.Actor.*')
+</pre>
+</div>
+</blockquote>
+<p>Guildenstern will hear any message whose name starts with the characters
+<tt class="docutils literal"><span class="pre">$.Actor.</span></tt>.</p>
+<p>In retrospect this makes sense for the audience, too - let's fix that.</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&lt;CTRL-C&gt;
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 2, in &lt;module&gt;
+KeyboardInterrupt
+&gt;&gt;&gt; audience.bind('$.Actor.*')
+&gt;&gt;&gt; while 1:
+...   print audience.wait_for_msg()
+...
+</pre>
+</div>
+</blockquote>
+<p>For convenience, the KBUS Python binding provides the <tt class="docutils literal"><span class="pre">wait_for_msg</span></tt> method
+to handle the simple form of <tt class="docutils literal"><span class="pre">select</span></tt>.</p>
+<p>It seems likely that rosencrantz will want to hear his colleague as well:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rosencrantz.bind('$.Actor.*')
+</pre>
+</div>
+</blockquote>
+<p>So now let guildenstern speak:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; guildenstern.send_msg(Message('$.Actor.Speak', 'Pssst!'))
+MessageId(0, 5)
+&gt;&gt;&gt; # Remember guildenstern is himself listening to '$.Actor.*'
+... print guildenstern.read_next_msg()
+&lt;Announcement '$.Actor.Speak', id=[0:5], from=3, data='Pssst!'&gt;
+</pre>
+</div>
+</blockquote>
+<p>and rosencrantz hears:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; msg = rosencrantz.read_next_msg()
+&gt;&gt;&gt; print msg
+&lt;Announcement '$.Actor.Speak', id=[0:5], from=3, data='Pssst!'&gt;
+</pre>
+</div>
+</blockquote>
+<p>However, when we look to the audience, we see:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&lt;Announcement '$.Actor.Speak', id=[0:5], from=3, data='Pssst!'&gt;
+&lt;Announcement '$.Actor.Speak', id=[0:5], from=3, data='Pssst!'&gt;
+</pre>
+</div>
+</blockquote>
+<p>This is because the audience has bound to the message twice - it is hearing it
+once because it asked to receive every <tt class="docutils literal"><span class="pre">$.Actor.Speak</span></tt> message, and again
+because it asked to hear any message matching <tt class="docutils literal"><span class="pre">$.Actor.*</span></tt>.</p>
+<p>The solution is simple - ask not to hear the more specific version.</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&lt;CTRL-C&gt;
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 2, in &lt;module&gt;
+  File &quot;/home/tibs/sw/kbus/python/kbus/ksock.py&quot;, line 492, in wait_for_msg
+    (r, w, x) = select.select([self], [], [], timeout)
+KeyboardInterrupt
+&gt;&gt;&gt; audience.unbind('$.Actor.Speak')
+&gt;&gt;&gt; while 1:
+...   msg = audience.wait_for_msg()
+...   print msg
+...
+</pre>
+</div>
+</blockquote>
+<p>Note that the unbinding must match the binding exactly.</p>
+</div>
+<div class="section" id="requests-and-repliers">
+<h2><a class="toc-backref" href="#id3">Requests and Repliers</a></h2>
+<p>We've shown that KBUS allows one to &quot;announce&quot; (or, less politely,
+&quot;shout&quot;) messages, but KBUS also supports asking questions.</p>
+<p>So let's make Guildenstern act as a Replier for &quot;query&quot; messages...</p>
+<blockquote>
+<div class="compound">
+<blockquote class="compound-first">
+<p><em>Terminal 3: Guildenstern</em></p>
+<pre class="literal-block">
+&gt;&gt;&gt; guildenstern.bind('$.Actor.Ask.Guildenstern', True)
+</pre>
+</blockquote>
+<p class="compound-middle"><em>(Only one person may be bound as Replier for a particular message
+name at any one time, so that it is unambiguous who is expected to do
+the replying.</em></p>
+<p class="compound-last"><em>Also, if a Sender tries to send a Request, but no-one has bound to that
+message name as a Replier, then an error is raised (contrast that with
+ordinary messages, where if no-one is listening, the message just gets
+ignored).)</em></p>
+</div>
+</blockquote>
+<p>If Rosencrantz then sends a Request of that name:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; from kbus import Request
+&gt;&gt;&gt; req = Request('$.Actor.Ask.Guildenstern', 'Were you speaking to me?')
+&gt;&gt;&gt; rosencrantz.send_msg(req)
+MessageId(0, 6)
+</pre>
+</div>
+</blockquote>
+<p>Remember, Rosencrantz still hears himself speaking - so let's undo that...</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; print rosencrantz.read_next_msg()
+&lt;Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1, flags=0x1 (REQ), data='Were you speaking to me?'&gt;
+&gt;&gt;&gt; rosencrantz.unbind('$.Actor.*')
+</pre>
+</div>
+</blockquote>
+<p>Guildenstern receives the request:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; req = guildenstern.read_next_msg()
+&gt;&gt;&gt; print req
+&lt;Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1, flags=0x3 (REQ,YOU), data='Were you speaking to me?'&gt;
+</pre>
+</div>
+</blockquote>
+<p>The flags indicate that this message is a Request (<tt class="docutils literal"><span class="pre">REQ</span></tt>), and also that
+this is a Request that guildenstern should reply to (<tt class="docutils literal"><span class="pre">YOU</span></tt>).</p>
+<p>There's a convenience method to find out if a particular message needs a
+reply:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; print req.wants_us_to_reply()
+True
+</pre>
+</div>
+</blockquote>
+<p>Of course, guildenstern also gets a copy of the message because of his binding
+as a Listener to <tt class="docutils literal"><span class="pre">$.Actor.*</span></tt>:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; msg = guildenstern.read_next_msg()
+&gt;&gt;&gt; print msg
+&lt;Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1, flags=0x1 (REQ), data='Were you speaking to me?'&gt;
+</pre>
+</div>
+</blockquote>
+<p>This second copy of the message is still marked as a Request (<tt class="docutils literal"><span class="pre">REQ</span></tt>), but is
+not marked as needing a reply (no <tt class="docutils literal"><span class="pre">YOU</span></tt> flag).</p>
+<p>Incidentally, KBUS does guarantee that the Request marked for reply will
+always be the first copy of the message to be received.</p>
+<p>There is, in fact, a way to ask KBUS to only deliver one copy of messages with
+a given name, the <tt class="docutils literal"><span class="pre">want_messages_once</span></tt> method, but I still have <em>some</em>
+reservations about its use, and anyway, in this case it makes more sense for
+Guildenstern just to unbind from <tt class="docutils literal"><span class="pre">$.Actor.*</span></tt>.</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; guildenstern.unbind('$.Actor.*')
+</pre>
+</div>
+</blockquote>
+<p>Regardless, Guildenstern can then reply:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rep = reply_to(req, 'Yes, yes I was')
+&gt;&gt;&gt; print rep
+&lt;Reply '$.Actor.Ask.Guildenstern', to=1, in_reply_to=[0:6], data='Yes, yes I was'&gt;
+&gt;&gt;&gt; guildenstern.send_msg(rep)
+MessageId(0, 7)
+&gt;&gt;&gt; guildenstern.read_next_msg()
+</pre>
+</div>
+</blockquote>
+<p>The <tt class="docutils literal"><span class="pre">reply_to</span></tt> convenience function crafts a new <tt class="docutils literal"><span class="pre">Reply</span></tt> message, with the
+various message parts set in an appropriate manner. And thus:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rep = rosencrantz.read_next_msg()
+&gt;&gt;&gt; print rep
+&lt;Reply '$.Actor.Ask.Guildenstern', id=[0:7], to=1, from=3, in_reply_to=[0:6], data='Yes, yes I was'&gt;
+</pre>
+</div>
+</blockquote>
+<p>Note that Rosencrantz didn't need to be bound to this message to receive it -
+he will always get a Reply to any Request he sends (KBUS goes to some lengths
+to guarantee this, so that even if Guildenstern closes his Ksock, it will
+generate a &quot;gone away&quot; message for him).</p>
+<p>Of course, the audience was listening.</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&lt;Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1, flags=0x1 (REQ), data='Were you speaking to me?'&gt;
+&lt;Reply '$.Actor.Ask.Guildenstern', id=[0:7], to=1, from=3, in_reply_to=[0:6], data='Yes, yes I was'&gt;
+</pre>
+</div>
+</blockquote>
+</div>
+<div class="section" id="stateful-requests">
+<h2><a class="toc-backref" href="#id4">Stateful requests</a></h2>
+<p>Sometimes it is useful to accumulate state at one end of a conversation. In
+such cases, the Sender wants to be sure that the same Replier is replying to
+any Requests. If the original Replier unbinds, or even disconnects from the
+Ksock, and someone else binds as Replier instead, that new someone will
+clearly not have the requisite state, and thus the Sender would like to know
+that this has occurred.</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; # About to start tossing coins
+... req = Request('$.Actor.Ask.Guildenstern',
+... 'Will you count heads for me?')
+&gt;&gt;&gt; rosencrantz.send_msg(req)
+MessageId(0, 8)
+</pre>
+</div>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; req = guildenstern.read_next_msg()
+&gt;&gt;&gt; guildenstern.send_msg(reply_to(req, 'Yes, yes I shall'))
+MessageId(0, 9)
+&gt;&gt;&gt; guildenstern.bind('$.Actor.CoinToss', True)
+&gt;&gt;&gt; heads = 0
+&gt;&gt;&gt; while True:
+...   toss = guildenstern.wait_for_msg()
+...   print toss
+...   if toss.data == 'Head':
+...     print 'A head - amazing'
+...     heads += 1
+...   else:
+...     print 'Bah, tails'
+...   guildenstern.send_msg(reply_to(toss, 'Head count is %d'%heads))
+...
+</pre>
+</div>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; rep = rosencrantz.read_next_msg()
+&gt;&gt;&gt; print rep.from_
+3
+&gt;&gt;&gt; # Throws a head
+... from kbus import stateful_request
+&gt;&gt;&gt; sreq = stateful_request(rep, '$.Actor.CoinToss', 'Head')
+&gt;&gt;&gt; print sreq
+&lt;Request '$.Actor.CoinToss', to=3, flags=0x1 (REQ), data='Head'&gt;
+&gt;&gt;&gt; rosencrantz.send_msg(sreq)
+MessageId(0, 10)
+</pre>
+</div>
+</blockquote>
+<p>The <tt class="docutils literal"><span class="pre">stateful_request</span></tt> is a convenience for preparing stateful request
+messages based on an earlier Reply. It takes the <tt class="docutils literal"><span class="pre">from_</span></tt> field from the
+Reply, and uses it as the <tt class="docutils literal"><span class="pre">to</span></tt> for the new Request. Having a specific <tt class="docutils literal"><span class="pre">to</span></tt>
+field is what makes the request stateful - sending it will fail if it is not
+going to be delivered to exactly that Ksock id.</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&lt;Request '$.Actor.CoinToss', id=[0:10], to=3, from=1, flags=0x3 (REQ,YOU), data='Head'&gt;
+A head - amazing
+MessageId(0, 11)
+</pre>
+</div>
+</blockquote>
+<p>The same again:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; count = rosencrantz.read_next_msg()
+&gt;&gt;&gt; print 'So,',count.data
+So, Head count is 1
+&gt;&gt;&gt; # Throws a head
+... sreq = stateful_request(rep, '$.Actor.CoinToss', 'Head')
+&gt;&gt;&gt; rosencrantz.send_msg(sreq)
+MessageId(0, 12)
+</pre>
+</div>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&lt;Request '$.Actor.CoinToss', id=[0:12], to=3, from=1, flags=0x3 (REQ,YOU), data='Head'&gt;
+A head - amazing
+MessageId(0, 13)
+</pre>
+</div>
+</blockquote>
+<p>Rosencrantz is good at throwing heads:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; count = rosencrantz.read_next_msg()
+&gt;&gt;&gt; print 'So,',count.data
+So, Head count is 2
+&gt;&gt;&gt; # Throws a head
+</pre>
+</div>
+</blockquote>
+<p>But, aha, Falstaff intervenes, and forces Guildenstern to disconnect:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&lt;CTRL-C&gt;
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 2, in &lt;module&gt;
+  File &quot;/home/tibs/sw/kbus/python/kbus/ksock.py&quot;, line 492, in wait_for_msg
+    (r, w, x) = select.select([self], [], [], timeout)
+KeyboardInterrupt
+&gt;&gt;&gt; print 'Falstaff! No! Ouch!'
+Falstaff! No! Ouch!
+&gt;&gt;&gt; guildenstern.close()
+</pre>
+</div>
+</blockquote>
+<p>And Falstaff then binds as Replier to the <tt class="docutils literal"><span class="pre">CoinToss</span></tt> message name, in an
+attempt to hijack the conversation - although, of course, he has no idea
+of how many heads have been tossed, so would not actually be of any use in
+this conversation:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 4: Falstaff</em></p>
+<pre class="compound-last literal-block">
+Python 2.6.4 (r264:75706, Dec  7 2009, 18:45:15)
+[GCC 4.4.1] on linux2
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; from kbus import *
+&gt;&gt;&gt; falstaff = Ksock(0)
+&gt;&gt;&gt; falstaff.bind('$.Actor.CoinToss', True)
+</pre>
+</div>
+</blockquote>
+<p>Innocently, Rosencrantz continues, but since the intended recipient has gone
+away, the message cannot be sent:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+... sreq = stateful_request(rep, '$.Actor.CoinToss', 'Head')
+&gt;&gt;&gt; rosencrantz.send_msg(sreq)
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;/home/tibs/sw/kbus/python/kbus/ksock.py&quot;, line 432, in send_msg
+    return self.send()
+  File &quot;/home/tibs/sw/kbus/python/kbus/ksock.py&quot;, line 220, in send
+    fcntl.ioctl(self.fd, Ksock.IOC_SEND, arg);
+IOError: [Errno 32] Broken pipe
+</pre>
+</div>
+</blockquote>
+<p>And Rosencrantz discovers that, in fact, state has been lost, skulduggery has
+been done, and so forth.</p>
+<p>The Python interface is not terribly helpful with interpreting <tt class="docutils literal"><span class="pre">IOError</span></tt>
+error numbers, but there is a useful commandline utility that reports both the
+standard Unix meaning of an <tt class="docutils literal"><span class="pre">errno</span></tt>, and also the specfic KBUS meaning (as
+given in the KBUS documentation). So, for instance:</p>
+<pre class="literal-block">
+$ errno.py 32
+Error 32 (0x20) is EPIPE: Broken pipe
+
+KBUS:
+On attempting to send 'to' a specific replier, the replier with that id
+is no longer bound to the given message's name.
+</pre>
+<p>From the audience's point of view:</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&lt;Request '$.Actor.Ask.Guildenstern', id=[0:8], from=1, flags=0x1 (REQ), data='Will you count heads for me?'&gt;
+&lt;Reply '$.Actor.Ask.Guildenstern', id=[0:9], to=1, from=3, in_reply_to=[0:8], data='Yes, yes I shall'&gt;
+&lt;Request '$.Actor.CoinToss', id=[0:10], to=3, from=1, flags=0x1 (REQ), data='Head'&gt;
+&lt;Reply '$.Actor.CoinToss', id=[0:11], to=1, from=3, in_reply_to=[0:10], data='Head count is 1'&gt;
+&lt;Request '$.Actor.CoinToss', id=[0:12], to=3, from=1, flags=0x1 (REQ), data='Head'&gt;
+&lt;Reply '$.Actor.CoinToss', id=[0:13], to=1, from=3, in_reply_to=[0:12], data='Head count is 2'&gt;
+</pre>
+</div>
+</blockquote>
+</div>
+<div class="section" id="tidying-up">
+<h2><a class="toc-backref" href="#id5">Tidying up</a></h2>
+<blockquote>
+<em>Just to show that these are real Python processes.</em></blockquote>
+<p>And to end things...</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 2: Audience</em></p>
+<pre class="compound-last literal-block">
+&lt;CTRL-C&gt;
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 2, in &lt;module&gt;
+  File &quot;/home/tibs/sw/kbus/python/kbus/ksock.py&quot;, line 492, in wait_for_msg
+    (r, w, x) = select.select([self], [], [], timeout)
+KeyboardInterrupt
+&gt;&gt;&gt; exit()
+</pre>
+</div>
+</blockquote>
+<p>Tidy everyone else up as well (showing that no-one has any messages left):</p>
+<blockquote>
+<div class="compound">
+<p class="compound-first"><em>Terminal 1: Rosencrantz</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; for msg in rosencrantz:
+...   print msg
+...
+&gt;&gt;&gt; exit()
+</pre>
+</div>
+<div class="compound">
+<p class="compound-first"><em>Terminal 3: Guildenstern</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; exit()
+</pre>
+</div>
+<div class="compound">
+<p class="compound-first"><em>Terminal 4: Falstaff</em></p>
+<pre class="compound-last literal-block">
+&gt;&gt;&gt; for msg in falstaff:
+...   print msg
+...
+&gt;&gt;&gt; exit()
+</pre>
+</div>
+</blockquote>
+</div>
+<div class="section" id="summary">
+<h2><a class="toc-backref" href="#id6">Summary</a></h2>
+<ul class="simple">
+<li>To send or receive messages, a process opens a Ksock.</li>
+<li>A process can send messages (be a Sender).</li>
+<li>A process can bind to receive messages (be a Listener) by message name.</li>
+<li>When binding to a message name, wildcards can be used.</li>
+<li>When binding to a message name, a process can say it wants to receive
+Requests with that name (be a Replier)</li>
+<li>There can only be one Replier for a given message name.</li>
+<li>There can be any number of Listeners for a given message name.</li>
+<li>It is not an error to send an ordinary message if no-one is listening.</li>
+<li>It is an error to send a Request if there is no Replier.</li>
+<li>Stateful Reqests insist that the expected Replier is replying.</li>
+</ul>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p>Running the examples in this introduction requires having
+the KBUS kernel module installed. Typically, on Ubuntu, this means
+doing:</p>
+<pre class="literal-block">
+svn checkout http://kbus.googlecode.com/svn/trunk/ kbus
+cd kbus/kbus
+make
+sudo make rules
+sudo insmod kbus.ko
+</pre>
+<p>When you've finished the examples, you can remove the kernel module again
+with:</p>
+<pre class="literal-block">
+sudo rmmod kbus.ko
+</pre>
+<p class="last">The message ids shown in the examples are correct if you've just installed
+the kernel module - the second number in each message id will be different
+(although always ascending) otherwise.</p>
+</div>
+</div>
+</div>
+<div class="section" id="why-the-reasons-for-kbus">
+<h1><a class="toc-backref" href="#id7">Why - The reasons for KBUS</a></h1>
+<p>So why are we developing KBUS, rather than using some other messaging system?</p>
+<div class="section" id="background">
+<h2><a class="toc-backref" href="#id8">Background</a></h2>
+<p>I work for Kynesim (<a class="reference external" href="http://www.kynesim.co.uk">http://www.kynesim.co.uk</a>) in Cambridge, UK.
+We work primarily in the embedded world, particularly on Set-Top Boxes (STBs).
+As such, typical software elements include video and audio decoders (or the
+interfaces to them, if this is done by hardware), user interface via remote
+control or keyboard, and some form of GUI, typically a web browser.</p>
+<p>Clearly, some mechanism is required to provide communication between all of
+these elements.</p>
+<p>We have had experience of bad solutions in the past - their flaws include such
+things as race conditions (for instance, when a browser crashes, it cannot
+reliably resume communication with the other processes it needs to liaise
+with), unreliable implementations (frustrating when one is not allowed to fix
+them) and poor documentation (well, some of that was fixable).</p>
+</div>
+<div class="section" id="aims">
+<h2><a class="toc-backref" href="#id9">Aims</a></h2>
+<p>We thus set out with the following aims for our solution:</p>
+<ul class="simple">
+<li>Simple models to &quot;think with&quot;, so that we can have a well understood system.</li>
+<li>Predictable delivery.</li>
+<li>Reliability.</li>
+<li><em>Always</em> get a reply to a request.</li>
+<li>Messages (on a particular bus) are in the same order for all recipients
+(deterministic message ordering per device).</li>
+<li>Small implementation size.</li>
+<li>Base code available in C (C++, for instance, is not always available on the
+platforms we work with).</li>
+<li>Good usability from Python (well, that was my requirement)</li>
+<li>We'd really prefer an open source package, and we definitely want one that
+is actively maintained.</li>
+</ul>
+<p>and that didn't really seem to leave us with an option other than writing it
+ourselves.</p>
+</div>
+<div class="section" id="simple-models">
+<h2><a class="toc-backref" href="#id10">Simple models</a></h2>
+<div class="section" id="names-for-things">
+<h3><a class="toc-backref" href="#id11">Names for things</a></h3>
+<p>We've striven for simple names for things:</p>
+<ul>
+<li><p class="first">KBUS devices are the buses over which communication happens.</p>
+</li>
+<li><p class="first">Ksocks are the connections to those buses. The name is meant to suggest they
+are a bit like sockets, but not quite.</p>
+<blockquote>
+<p>(I'm not actually terribly happy with &quot;Ksock&quot;, but it's difficult to
+come up with good names for things, and it's better than the working
+name of &quot;Elephant&quot; that I was using for a short while in early
+development.)</p>
+</blockquote>
+</li>
+<li><p class="first">The basic messaging entities are Senders, Listeners and Repliers - one
+should already be able to guess what they do.</p>
+</li>
+<li><p class="first">The basic types of messages are Announcements, Requests, Replies - again,
+these should be fairly obvious.</p>
+</li>
+<li><p class="first">Message names are defined fairly simply, with (we hope) just enough
+flexibility, and the parts of a message (<tt class="docutils literal"><span class="pre">to</span></tt> and <tt class="docutils literal"><span class="pre">from</span></tt>,
+<tt class="docutils literal"><span class="pre">in_reply_to</span></tt>, etc.) are hopefully not too hard to understand from their
+names.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="interfaces">
+<h3><a class="toc-backref" href="#id12">Interfaces</a></h3>
+<p>There are three levels of interface provided:</p>
+<ol class="arabic">
+<li><p class="first">The &quot;bare Unix&quot; level.</p>
+<p>We use a kernel module to provide our devices, which are named as
+<tt class="docutils literal"><span class="pre">/dev/kbus0</span></tt> (for bus 0), <tt class="docutils literal"><span class="pre">/dev/kbus1</span></tt> (for bus 1), and so on.</p>
+<p>Ksocks are then implemented with file operations - <tt class="docutils literal"><span class="pre">open</span></tt>, <tt class="docutils literal"><span class="pre">read</span></tt>,
+<tt class="docutils literal"><span class="pre">write</span></tt>, <tt class="docutils literal"><span class="pre">close</span></tt> and IOCTLs), with which experienced Unix programmers
+should already be familiar,</p>
+</li>
+<li><p class="first">The Python API. This was written as the primary testing API, and works with
+classes that match the main named things. I believe this to be fairly easy
+to use. I also use it as the main way of illustrating how KBUS works.</p>
+</li>
+<li><p class="first">The C library. This hides the details of the &quot;bare Unix&quot; level, and also
+removes the worry about handling such things as <tt class="docutils literal"><span class="pre">ernno</span></tt> when using
+IOTCLs. It is intended to be the normal means of using KBUS from C, and
+should also be useful when writing interfaces in other languages (which can
+typically call C).</p>
+</li>
+</ol>
+</div>
+<div class="section" id="the-kbus-kernel-module">
+<h3><a class="toc-backref" href="#id13">The KBUS kernel module</a></h3>
+<p>Using a kernel module means that:</p>
+<ul class="simple">
+<li>We can have a file interface, which makes KBUS easier to use.</li>
+<li>We can expect a guarantee of being told when a Ksock has closed, including
+if it has been closed because the process that opened it has crashed. This
+type of guarantee is much harder to attain in user space.</li>
+<li>We can have a real expectation of our &quot;daemon&quot; not crashing (it is much
+easier to write a kernel module that is reliable, partly because there are
+so many constraints on how one does it, partly because one is executing in a
+different context, and partly because kernel mechanisms mediate the modules
+interaction with user space).</li>
+<li>We get to use relatively sophisticated and proven datastructures. Kernel
+modules are expected to use the provided mechanisms for handling lists
+and other datatypes. This avoids a lot of reinventing the wheel, or
+dependency on other libraries which might not be present.</li>
+<li>The kernel hides a lot of the complicated stuff (both at the top and bottom
+level) from us, so we can't do it wrong (well, it's much harder). For
+instance, <tt class="docutils literal"><span class="pre">read</span></tt> and <tt class="docutils literal"><span class="pre">write</span></tt> at the user level get filtered down into
+more predictable calls at the kernel module level.</li>
+<li>We benefit from kernel strategies on memory management, copying, etc.</li>
+<li>We stand to gain from the kernel handling such issues as multiple CPUs,
+threading and so on.</li>
+<li>With KBUS being in the kernel address space, we should benefit from less
+context switching.</li>
+</ul>
+</div>
+<div class="section" id="messages">
+<h3><a class="toc-backref" href="#id14">Messages</a></h3>
+<p>In order to keep KBUS itself simple, KBUS does not say anything about the
+message content. It restricts itself to defining the message header and the
+mechanisms for managing messages.</p>
+<blockquote>
+(We do have a nearly finished ASN.1 library for message data, and are
+looking at XMPP support, but these will be extras, not core KBUS. And,
+of course, one can use other mechanisms as one wishes.)</blockquote>
+<p>As indicated in the section on naming, the fields in the header aim to be easy
+to understand, and we try to define <em>just</em> the fields we need. Unused fields
+are always zero.</p>
+</div>
+</div>
+<div class="section" id="predictable-delivery">
+<h2><a class="toc-backref" href="#id15">Predictable delivery</a></h2>
+<p>It is acceptable for a Listener to miss messages (although there are ways around
+that), but a Replier shall never miss the Requests sent to it.</p>
+<p>We also want to guarantee that each Request shall produce a Reply (even if it
+is a Reply indicating failure to deliver the Request).</p>
+<p>So:</p>
+<ul class="simple">
+<li>If a sender attempts to send a Request, but does not have room on its
+message queue for the (corresponding) Reply, then the message will not be
+sent, and the send will fail. At the &quot;bare Unix&quot; level, this means that the
+<tt class="docutils literal"><span class="pre">send</span></tt> IOCTL returns a <tt class="docutils literal"><span class="pre">-ENOLCK</span></tt> error - the failure is immediate.</li>
+<li>If a replier cannot receive a particular message, because its queue is full,
+then the message will not be sent, and the send will fail with a <tt class="docutils literal"><span class="pre">-EBUSY</span></tt>
+error. Again, this failure is immediate.</li>
+<li>If a message has the ALL_OR_FAIL flag set, then a send will only succeed if
+the message could be added to all the (intended) recipient’s message
+queues (listeners as well).  Otherwise, <tt class="docutils literal"><span class="pre">send</span></tt> returns a <tt class="docutils literal"><span class="pre">-EBUSY</span></tt>
+error. Again, failure is immediate.</li>
+<li>If a message has the ALL_OR_WAIT flag set, then a send will only succeed if
+the message could be added to all the (intended) recipient’s message
+queues (listeners as well).  Otherwise <tt class="docutils literal"><span class="pre">send</span></tt> returns a <tt class="docutils literal"><span class="pre">-EAGAIN</span></tt> error.
+Again, failure is immediate, and the sender then needs to discard the
+message, or play the <tt class="docutils literal"><span class="pre">poll</span></tt>/<tt class="docutils literal"><span class="pre">select</span></tt> game to wait for the send to
+finish).</li>
+</ul>
+<p>Note that we believe these last two mechanisms are primarily of use when
+debugging systems.</p>
+<p>Finally:</p>
+<blockquote>
+&quot;&quot;&quot;KBUS guarantees that each Request will (eventually) be matched by a
+consequent Reply (or Status) message, and only one such.&quot;&quot;&quot;</blockquote>
+<p>If the replier can't give a Reply, KBUS will generate one (e.g.,
+&quot;<tt class="docutils literal"><span class="pre">$.KBUS.Replier.Unbound</span></tt>&quot; or &quot;<tt class="docutils literal"><span class="pre">$.KBUS.Replier.GoneAway</span></tt>&quot;).</p>
+</div>
+<div class="section" id="message-order-is-the-same-for-all">
+<h2><a class="toc-backref" href="#id16">Message order is the same for all</a></h2>
+<p>It is important that if sender R sends a message on a particular KBUS device,
+and sender G sends a message on the same KBUS, then all recipients of both
+messages will see them in the same order.</p>
+<blockquote>
+<p>(Imagine sending instructions to a video decoder and a video recorder.
+Clearly both may need to receive the same instructions, and it is
+important to receive the instructions in the appropriate order.</p>
+<p>Similarly, consider a logging Listener. This too clearly wants to receive
+messages in the same order as the other Listeners. It especially wants to
+see Requests and Replies in the appropriate order.)</p>
+</blockquote>
+<p>Since KBUS (the kernel module) has control over both ends of the transactions,
+this is fairly simple to guarantee.</p>
+</div>
+<div class="section" id="isolation-of-buses">
+<h2><a class="toc-backref" href="#id17">Isolation of buses</a></h2>
+<p>KBUS can provide multiple KBUS devices, but it does not allow communication
+between them; they are totally isolated from each other.</p>
+<p>Think of our notional R and G as metaphorical goldfish in a bowl.
+They can only communicate via KBUS, and each bowl contains a single KBUS
+device - in this instance, KBUS device 3:</p>
+<img alt="images/04_fish_in_bowl2.png" src="images/04_fish_in_bowl2.png" style="width: 5cm;" />
+<!-- :width:  370px -->
+<!-- :height: 306px -->
+<!-- :scale:  66 -->
+<p>Two other fish, communicating via a different KBUS device, are in a different
+metaphorical bowl, and thus cannot communicate with R and G.</p>
+<img alt="images/09_two_disjoint_bowls.png" src="images/09_two_disjoint_bowls.png" style="width: 10.3cm;" />
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">But see <a class="reference internal" href="#limpets">Limpets</a> at the end of the document.</p>
+</div>
+</div>
+<div class="section" id="documentation">
+<h2><a class="toc-backref" href="#id18">Documentation</a></h2>
+<p>It didn't make the list of &quot;Aims&quot;, because I just assumed it as a necessary
+part of <em>any</em> project, but KBUS also comes with documentation. Indeed, the
+initial documentation came before the first implementation.</p>
+<p>Particularly in the first phases of development, we would cycle through:</p>
+<ul class="simple">
+<li>Describe how features of KBUS should (probably) work</li>
+<li>Look at implementing (the next part of) that</li>
+<li>Discover whether it made sense</li>
+<li>Refine documentation or implementation, as appropriate</li>
+</ul>
+<p>Sometimes following through the logic of the specification in the
+documentation would lead to inconsistencies (so let's not do it like that,
+then), and sometimes doing the actual implenentation would lead to &quot;ah, in
+that case&quot; moments, feeding back into the documentation.</p>
+<p>Reading &quot;Coder at Work&quot;, by Peter Seibel, I was struck by the following, which
+feels somewhat similar:</p>
+<blockquote>
+<p>&quot;&quot;&quot;We met every morning at coffee and had a long conversation -- about an
+hour to two hours -- and we covered the whiteboard in stuff. I'd take loads
+of notes -- I wrote all the documentation immediately and they wrote all the
+code. Sometimes I'd write a bit of code as well. And when I was writing the
+documentation I'd discover, I can't describe this, we have to change it. Or
+they would run into me and say, &quot;Nah, it doesn't work; this idea we had this
+morning, because of this, this, this, and this it doesn't work.&quot; At the end
+of the day we either got to the point where we got all the documentation and
+all the code or enough of the code and enough of the documentation that we
+knew it was going to work. And then we called it a day.&quot;&quot;&quot;</p>
+<p class="attribution">&mdash;Joe Armstrong (Erlang), on designing and writing OTP (Open Telecom Platform,
+&quot;a middleware platform for building high availability, fault tolerant,
+distributed, soft real-time systems&quot; -- sort of a .NET for Erlang), page
+230.</p>
+</blockquote>
+<p>Being able to produce quick examples with the Python binding was especially
+important for this process - a flavour of how a feature would work (or not)
+could be gotten as soon as something was being implemented.</p>
+</div>
+<div class="section" id="why-not-use">
+<h2><a class="toc-backref" href="#id19">Why not use?</a></h2>
+<p>What else could we have used?</p>
+<ul>
+<li><p class="first">Linux systems provide POSIX message queues, via the <tt class="docutils literal"><span class="pre">mqueue</span></tt> system. These
+were introduced in Linux 2.6.2. They appear to be intended for use in
+realtime systems, where message sending needs to be fast, but there are not
+large numbers of messages. They appear too simple and too limited for our
+purposes.</p>
+</li>
+<li><p class="first">DBUS. For our purposes, this is over-complex. It is certainly hard to get
+to grips with. Apart from that, it does not appear to support deterministic
+message ordering on the same bus, which is one of our key requirements.</p>
+</li>
+<li><p class="first">zeromq (or 0mq). This looks rather nice. It has good introductions, and
+seems to have a clear idea of what its aims are, in particular aiming for
+speed and scalability.</p>
+<p>Its messages are minimalistic in strucure (a name and then content), which
+is really rather nice. It is also very cross platform, both in the
+&quot;implemented on&quot; sense, and in the &quot;available for language X&quot; sense.</p>
+<p>However, it doesn't appear to be aiming for the sort of &quot;predicability&quot;
+we're after (or so I deduce from a scan of the documentation), and it is
+written in C++, which rules it out for some prospective platforms.</p>
+</li>
+</ul>
+<p>I must have missed systems that I really should know about, and would be
+interested in knowing what they are (although note I'm ignoring many
+&quot;enterprise space&quot; systems, which often do seek guarantees of delivery, but at
+the cost of being an enterprise system.)</p>
+</div>
+</div>
+<div class="section" id="limpets">
+<h1><a class="toc-backref" href="#id20">Limpets</a></h1>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is a very brief introduction to the idea of Limpets, which are
+curently an experimental extension to the software provided by KBUS. See
+the online documentation for more information.</p>
+</div>
+<p>By design, KBUS does not allow message sending between KBUS devices, whether
+they are on the same machine or not. Sometimes it is necessary to perform such
+communication, however, even it if means a slight loss in reliability.</p>
+<p>KBUS provides support for writing <em>Limpets</em>, which are user-space programs
+(daemons) that run in the background and communicate between a particular KBUS
+device and another Limpet.</p>
+<p>Consider a KBUS device as being inside a goldfish bowl. The goldfish inside
+the bowl communicate with each other using KBUS messages, via that particular
+KBUS device:</p>
+<img alt="images/05_fish_talk.png" src="images/05_fish_talk.png" style="width: 5cm;" />
+<!-- :width:  370px -->
+<!-- :height: 306px -->
+<!-- :scale:  66 -->
+<p>Now consider another goldfish bowl, containing a different KBUS device.
+We'd like goldfish in the two bowls to be able to communuicate with each
+other, as if they were using the same KBUS device - i.e., were in the same
+bowl.</p>
+<p>So, let's place a &quot;limpet&quot; on the inside of each bowl's glass. Limpets always
+come in pairs, one in each bowl. Each Limpet can communicate with the other
+using a simple laser communications link (so they're clever cyborg limpets),
+and each Limpet can also communicate with its KBUS kernel module.</p>
+<blockquote>
+KBUS provides code allowing the Limpet to communicate with the KBUS
+device, but leaves the &quot;laser link&quot; up to the individual application.
+A simple example using sockets is provided in the KBUS sources.</blockquote>
+<img alt="images/06_limpet_pair.png" src="images/06_limpet_pair.png" style="width: 10.3cm;" />
+<!-- :width:  787px -->
+<!-- :height: 306px -->
+<!-- :scale:  66 -->
+<p>The Limpet then needs to proxy messages for KBUS users in its bowl to the other
+bowl, and back again. The default is to proxy all messages.</p>
+<p>If goldfish G in Bowl 3 wants to listen to <tt class="docutils literal"><span class="pre">$.Gulp</span></tt> messages from Bowl 0,
+then this is simple.</p>
+<ul class="simple">
+<li>Goldfish G binds as a Listener for <tt class="docutils literal"><span class="pre">$.Gulp</span></tt>, on KBUS device 0, as normal.</li>
+<li>Goldfish A sends a <tt class="docutils literal"><span class="pre">$.Gulp</span></tt> message, to KBUS device 3.</li>
+<li>Limpet 2 receieves the message, and since it is a plain Announcement, sends
+it to Limpet 1</li>
+<li>Limpet 1 receives it, and sends a copy to KBUS device 0.</li>
+<li>Goldfish G receives it.</li>
+</ul>
+<img alt="images/07_A_talks_to_G.png" src="images/07_A_talks_to_G.png" style="width: 10.3cm;" />
+<!-- :width:  787px -->
+<!-- :height: 307px -->
+<!-- :scale:  66 -->
+<p>What if goldfish G wants to bind as a Replier for message <tt class="docutils literal"><span class="pre">$.Gulp</span></tt>? Limpets
+handle that as well, by binding as a proxy-replier in the other goldfish
+bowls. So:</p>
+<ul class="simple">
+<li>Goldfish G binds as a Replier for <tt class="docutils literal"><span class="pre">$.Gulp</span></tt>, on KBUS device 3.</li>
+<li>KBUS device 3 sends out a Replier Bind Event message (these are only enabled
+when we are doing Limpetry), saying that goldfish G has bound as a Replier
+for <tt class="docutils literal"><span class="pre">$.Gulp</span></tt>.</li>
+<li>Limpet 2 receives this message, and tells Limpet 1.</li>
+<li>Limpet 1 then binds as a Replier for <tt class="docutils literal"><span class="pre">$.Gulp</span></tt>, on KBUS device 0.</li>
+</ul>
+<p>This allows goldfish A and G to interact with a Request/Reply sequence as
+normal:</p>
+<ul class="simple">
+<li>Goldfish A send a Request <tt class="docutils literal"><span class="pre">$.Gulp</span></tt> to KBUS device 0.</li>
+<li>Limpet 1 receives it, as the Replier for that message on KBUS device 0.</li>
+<li>Limpet 1 sends the message to Limpet 2.</li>
+<li>Limpet 2 sends the message, as a new Request, to KBUS device 3.</li>
+<li>Goldfish G receives the message, marked as a Request to which it should
+reply.</li>
+<li>Goldfish G replies to the Request.</li>
+<li>Limpet 2 receives the Reply (since it issued the request on this KBUS
+device).</li>
+<li>Limpet 2 sends the message to Limpet 1.</li>
+<li>Limpet 1 uses the message to form <em>its</em> Reply, which it then sends to
+KBUS device 0, since in this bowl <em>it</em> is the Replier.</li>
+<li>Goldfish A receives the Reply.</li>
+</ul>
+<p>Handling Stateful Requests (and Replies) needs a bit more infrastructure, but
+is essentially handled by the same mechanism, with added <tt class="docutils literal"><span class="pre">orig_from</span></tt> and
+<tt class="docutils literal"><span class="pre">final_to</span></tt> fields, so that the Limpets can tell when the messages have reached
+its destinations.</p>
+<blockquote>
+(The <tt class="docutils literal"><span class="pre">orig_from</span></tt> indicates both the original Ksock (goldfish G) and also
+the first Limpet (Limpet 2). This can then be copied to the <tt class="docutils literal"><span class="pre">final_to</span></tt>
+field of a Stateful Request to indicate that it really is goldfish G that
+is wanted, even though goldfish A can't &quot;see&quot; them.)</blockquote>
+<p>These mechanisms will also work when there are intermediate bowls:</p>
+<img alt="images/08_3_bowls.png" src="images/08_3_bowls.png" style="width: 15cm;" />
+<!-- :width:  790px -->
+<!-- :height: 210px -->
+<!-- vim: set filetype=rst tabstop=8 softtabstop=2 shiftwidth=2 expandtab: -->
+</div>
+</div>
+</body>
+</html>
