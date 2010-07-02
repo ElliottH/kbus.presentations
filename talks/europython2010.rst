@@ -12,6 +12,10 @@ KBUS: A simple messaging system
 
 .. contents::
 
+.. raw:: pdf
+
+    PageBreak
+
 -----------------------------------------
 How - A simple introduction to using KBUS
 -----------------------------------------
@@ -27,6 +31,7 @@ We shall start with a single "actor" in our virtual playlet:
 First our actor needs to connect to KBUS itself, by opening a Ksock:
 
 Introducing Rosencrantz
+
   .. compound::
 
      *Terminal 1: Rosencrantz* ::
@@ -84,6 +89,12 @@ This will succeed, but doesn't do anything very useful, because no-one is
 listening. So, we shall need a second process, which we shall start in a
 new terminal.
 
+
+.. raw:: pdf
+
+    PageBreak
+
+..
 
   .. compound::
 
@@ -315,6 +326,8 @@ So let's make Guildenstern act as a Replier for "query" messages...
 
        >>> guildenstern.bind('$.Actor.Ask.Guildenstern', True)
 
+.. 
+
    *(Only one person may be bound as Replier for a particular message
    name at any one time, so that it is unambiguous who is expected to do
    the replying.*
@@ -342,7 +355,8 @@ Remember, Rosencrantz still hears himself speaking - so let's undo that...
      *Terminal 1: Rosencrantz* ::
 
        >>> print rosencrantz.read_next_msg()
-       <Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1, flags=0x1 (REQ), data='Were you speaking to me?'>
+       <Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1, flags=0x1 (REQ),
+       data='Were you speaking to me?'>
        >>> rosencrantz.unbind('$.Actor.*')
 
 Guildenstern receives the request:
@@ -353,7 +367,8 @@ Guildenstern receives the request:
 
        >>> req = guildenstern.read_next_msg()
        >>> print req
-       <Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1, flags=0x3 (REQ,YOU), data='Were you speaking to me?'>
+       <Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1, flags=0x3 (REQ,YOU),
+       data='Were you speaking to me?'>
 
 The flags indicate that this message is a Request (``REQ``), and also that
 this is a Request that guildenstern should reply to (``YOU``).
@@ -371,13 +386,20 @@ reply:
 Of course, guildenstern also gets a copy of the message because of his binding
 as a Listener to ``$.Actor.*``:
 
+.. raw:: pdf
+
+    PageBreak
+
+..
+
   .. compound::
 
      *Terminal 3: Guildenstern* ::
 
        >>> msg = guildenstern.read_next_msg()
        >>> print msg
-       <Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1, flags=0x1 (REQ), data='Were you speaking to me?'>
+       <Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1, flags=0x1 (REQ),
+       data='Were you speaking to me?'>
 
 This second copy of the message is still marked as a Request (``REQ``), but is
 not marked as needing a reply (no ``YOU`` flag).
@@ -405,7 +427,8 @@ Regardless, Guildenstern can then reply:
 
        >>> rep = reply_to(req, 'Yes, yes I was')
        >>> print rep
-       <Reply '$.Actor.Ask.Guildenstern', to=1, in_reply_to=[0:6], data='Yes, yes I was'>
+       <Reply '$.Actor.Ask.Guildenstern', to=1, in_reply_to=[0:6],
+       data='Yes, yes I was'>
        >>> guildenstern.send_msg(rep)
        MessageId(0, 7)
        >>> guildenstern.read_next_msg()
@@ -419,7 +442,8 @@ various message parts set in an appropriate manner. And thus:
 
        >>> rep = rosencrantz.read_next_msg()
        >>> print rep
-       <Reply '$.Actor.Ask.Guildenstern', id=[0:7], to=1, from=3, in_reply_to=[0:6], data='Yes, yes I was'>
+       <Reply '$.Actor.Ask.Guildenstern', id=[0:7], to=1, from=3,
+       in_reply_to=[0:6], data='Yes, yes I was'>
 
 Note that Rosencrantz didn't need to be bound to this message to receive it -
 he will always get a Reply to any Request he sends (KBUS goes to some lengths
@@ -432,8 +456,10 @@ Of course, the audience was listening.
 
      *Terminal 2: Audience* ::
 
-       <Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1, flags=0x1 (REQ), data='Were you speaking to me?'>
-       <Reply '$.Actor.Ask.Guildenstern', id=[0:7], to=1, from=3, in_reply_to=[0:6], data='Yes, yes I was'>
+       <Request '$.Actor.Ask.Guildenstern', id=[0:6], from=1,
+       flags=0x1 (REQ), data='Were you speaking to me?'>
+       <Reply '$.Actor.Ask.Guildenstern', id=[0:7], to=1, from=3,
+       in_reply_to=[0:6], data='Yes, yes I was'>
        
 Stateful requests
 -----------------
@@ -499,7 +525,8 @@ going to be delivered to exactly that Ksock id.
 
      *Terminal 3: Guildenstern* ::
 
-       <Request '$.Actor.CoinToss', id=[0:10], to=3, from=1, flags=0x3 (REQ,YOU), data='Head'>
+       <Request '$.Actor.CoinToss', id=[0:10], to=3, from=1,
+       flags=0x3 (REQ,YOU), data='Head'>
        A head - amazing
        MessageId(0, 11)
        
@@ -521,7 +548,8 @@ The same again:
 
      *Terminal 3: Guildenstern* ::
 
-       <Request '$.Actor.CoinToss', id=[0:12], to=3, from=1, flags=0x3 (REQ,YOU), data='Head'>
+       <Request '$.Actor.CoinToss', id=[0:12], to=3, from=1,
+       flags=0x3 (REQ,YOU), data='Head'>
        A head - amazing
        MessageId(0, 13)
        
@@ -608,13 +636,24 @@ From the audience's point of view:
 
      *Terminal 2: Audience* ::
 
-       <Request '$.Actor.Ask.Guildenstern', id=[0:8], from=1, flags=0x1 (REQ), data='Will you count heads for me?'>
-       <Reply '$.Actor.Ask.Guildenstern', id=[0:9], to=1, from=3, in_reply_to=[0:8], data='Yes, yes I shall'>
-       <Request '$.Actor.CoinToss', id=[0:10], to=3, from=1, flags=0x1 (REQ), data='Head'>
-       <Reply '$.Actor.CoinToss', id=[0:11], to=1, from=3, in_reply_to=[0:10], data='Head count is 1'>
-       <Request '$.Actor.CoinToss', id=[0:12], to=3, from=1, flags=0x1 (REQ), data='Head'>
-       <Reply '$.Actor.CoinToss', id=[0:13], to=1, from=3, in_reply_to=[0:12], data='Head count is 2'>
+       <Request '$.Actor.Ask.Guildenstern', id=[0:8], from=1,
+       flags=0x1 (REQ), data='Will you count heads for me?'>
+       <Reply '$.Actor.Ask.Guildenstern', id=[0:9], to=1, from=3,
+       in_reply_to=[0:8], data='Yes, yes I shall'>
+       <Request '$.Actor.CoinToss', id=[0:10], to=3, from=1,
+       flags=0x1 (REQ), data='Head'>
+       <Reply '$.Actor.CoinToss', id=[0:11], to=1, from=3,
+       in_reply_to=[0:10], data='Head count is 1'>
+       <Request '$.Actor.CoinToss', id=[0:12], to=3, from=1,
+       flags=0x1 (REQ), data='Head'>
+       <Reply '$.Actor.CoinToss', id=[0:13], to=1, from=3,
+       in_reply_to=[0:12], data='Head count is 2'>
        
+
+.. raw:: pdf
+
+    PageBreak
+
 Tidying up
 ----------
 
@@ -692,6 +731,10 @@ Summary
    The message ids shown in the examples are correct if you've just installed
    the kernel module - the second number in each message id will be different
    (although always ascending) otherwise.
+
+.. raw:: pdf
+
+    PageBreak
 
 --------------------------
 Why - The reasons for KBUS
@@ -886,6 +929,10 @@ messages will see them in the same order.
 Since KBUS (the kernel module) has control over both ends of the transactions,
 this is fairly simple to guarantee.
 
+.. raw:: pdf
+
+    PageBreak
+
 Isolation of buses
 ------------------
 KBUS can provide multiple KBUS devices, but it does not allow communication
@@ -897,10 +944,6 @@ device - in this instance, KBUS device 3:
 
 .. image:: images/04_fish_in_bowl2.png
    :width: 5cm
-
-.. :width:  370px
-.. :height: 306px
-.. :scale:  66
 
 Two other fish, communicating via a different KBUS device, are in a different
 metaphorical bowl, and thus cannot communicate with R and G.
@@ -981,6 +1024,10 @@ I must have missed systems that I really should know about, and would be
 interested in knowing what they are (although note I'm ignoring many
 "enterprise space" systems, which often do seek guarantees of delivery, but at
 the cost of being an enterprise system.)
+
+.. raw:: pdf
+
+    PageBreak
 
 -------
 Limpets
@@ -1087,6 +1134,10 @@ its destinations.
     the first Limpet (Limpet 2). This can then be copied to the ``final_to``
     field of a Stateful Request to indicate that it really is goldfish G that
     is wanted, even though goldfish A can't "see" them.)
+
+.. raw:: pdf
+
+    PageBreak
 
 These mechanisms will also work when there are intermediate bowls:
 
