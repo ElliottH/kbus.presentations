@@ -818,9 +818,18 @@ the cost of being an enterprise system.)
 -------
 Limpets
 -------
+
+.. note:: This is a very brief introduction to the idea of Limpets, which are
+   curently an experimental extension to the software provided by KBUS. See
+   the online documentation for more information.
+
 By design, KBUS does not allow message sending between KBUS devices, whether
 they are on the same machine or not. Sometimes it is necessary to perform such
 communication, however, even it if means a slight loss in reliability.
+
+KBUS provides support for writing *Limpets*, which are user-space programs
+(daemons) that run in the background and communicate between a particular KBUS
+device and another Limpet.
 
 Consider a KBUS device as being inside a goldfish bowl. The goldfish inside
 the bowl communicate with each other using KBUS messages, via that particular
@@ -838,10 +847,14 @@ We'd like goldfish in the two bowls to be able to communuicate with each
 other, as if they were using the same KBUS device - i.e., were in the same
 bowl.
 
-So, let's place a "limpet" on the inside of each bowl's glass. Each Limpet can
-communicate with the other using a simple laser communications link (so
-they're clever cyborg limpets), and each Limpet can also communicate with its
-KBUS kernel module.
+So, let's place a "limpet" on the inside of each bowl's glass. Limpets always
+come in pairs, one in each bowl. Each Limpet can communicate with the other
+using a simple laser communications link (so they're clever cyborg limpets),
+and each Limpet can also communicate with its KBUS kernel module.
+
+    KBUS provides code allowing the Limpet to communicate with the KBUS
+    device, but leaves the "laser link" up to the individual application.
+    A simple example using sockets is provided in the KBUS sources.
 
 .. image:: images/06_limpet_pair.png
    :width: 10.3cm
@@ -851,7 +864,7 @@ KBUS kernel module.
 ..   :scale:  66
 
 The Limpet then needs to proxy messages for KBUS users in its bowl to the other
-bowl, and back again.
+bowl, and back again. The default is to proxy all messages.
 
 If goldfish G in Bowl 3 wants to listen to ``$.Gulp`` messages from Bowl 0,
 then this is simple.
@@ -915,12 +928,5 @@ These mechanisms will also work when there are intermediate bowls:
 
 ..   :width:  790px
 ..   :height: 210px
-
-.. note:: There are various restrictions on what Limpets can do and how they
-   must be used. See the online documentation for more information.
-
-   Also, KBUS itself does not provide code for the communication between
-   Limpets, since it does not mandate what mechanism is actually used,
-   although a simple example using sockets is provided.
 
 .. vim: set filetype=rst tabstop=8 softtabstop=2 shiftwidth=2 expandtab:
