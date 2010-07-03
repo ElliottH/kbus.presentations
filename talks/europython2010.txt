@@ -8,6 +8,11 @@ KBUS: A simple messaging system
 
 :Repository: http://code.google.com/p/kbus/
 
+.. Process this file with ``minicog.py`` to execute the [[[ .. ]]] clauses.
+   Beware that the running of multiple subprocesses is not handled very well
+   by that code, so it is always necessary to check the result to see if it
+   actually makes sense.
+
 ------------------------------------------------------------------------------
 
 .. contents::
